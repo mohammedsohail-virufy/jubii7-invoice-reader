@@ -30,6 +30,7 @@
   --shadow:0 1px 2px rgba(14,21,37,.05)}}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
+html,body{overflow-x:clip}  /* the hero grid bleeds past the edges by design; never let it widen the page */
 body{margin:0;font:15px/1.6 var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
@@ -67,7 +68,7 @@ h3{font-size:15px;font-weight:700;margin:22px 0 10px}
 /* ---------- stats strip (one bar, never orphan boxes) ---------- */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:0 auto 18px;overflow:hidden}
 .stat{padding:22px 18px;text-align:center;border-left:1px solid var(--line)}.stat:first-child{border-left:0}
-.stat{padding:28px 18px}.stat .v{font-size:38px;font-weight:600;letter-spacing:-.03em;line-height:1.1}.stat .v.accent{color:var(--accent)}
+.stat{padding:28px 18px}.stat .v{white-space:nowrap;font-size:clamp(24px,3.1vw,38px);font-weight:600;letter-spacing:-.03em;line-height:1.1}.stat .v.accent{color:var(--accent)}
 .stat .l{font:500 11.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-top:8px;color:var(--ink2)}.stat .n{font-size:12px;color:var(--muted);margin-top:2px}
 
 /* ---------- pipeline stepper ---------- */
@@ -393,6 +394,7 @@ document.querySelectorAll("#nav button").forEach(b => b.onclick = () => {
 let startTab = location.hash.slice(1);
 try { startTab ||= localStorage.getItem("tab") || ""; } catch (e) {}
 if (startTab) document.querySelector(`#nav [data-t="${startTab}"]`)?.click();
+window.addEventListener("load", () => window.scrollTo(0, 0));  // tab ids double as hashes: don't jump past the header
 
 let D = {};
 async function boot() {
