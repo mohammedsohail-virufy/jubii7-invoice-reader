@@ -7,7 +7,7 @@
     "C": 10.0
   },
   "package_version": "1.0.0",
-  "trained_at": "2026-11-25T12:17:31+00:00",
+  "trained_at": "2026-11-25T12:27:10+00:00",
   "data": {
     "rows": 57,
     "excluded_unmapped": 0,
@@ -33,7 +33,7 @@
       "cv_accuracy_mean": 0.8627,
       "test_f1_macro": 0.769,
       "test_log_loss": 0.811,
-      "run_id": "fcb0a478732d411ea7a9412852f8b613"
+      "run_id": "f955cae9bce24734849c28b5df7233af"
     },
     "char_tfidf_logreg": {
       "cv_f1_macro_mean": 0.833467,
@@ -41,7 +41,7 @@
       "cv_accuracy_mean": 0.8485,
       "test_f1_macro": 0.8262,
       "test_log_loss": 0.8134,
-      "run_id": "aa2f3de6ce344d64ad7d04120304bc8e"
+      "run_id": "98832ee63463454d98243b7feeb080ac"
     },
     "char_tfidf_sgd": {
       "cv_f1_macro_mean": 0.82099,
@@ -49,7 +49,7 @@
       "cv_accuracy_mean": 0.8348,
       "test_f1_macro": 0.7667,
       "test_log_loss": 0.9361,
-      "run_id": "ccd92132aa154136a32a5b3fc2967e63"
+      "run_id": "3247cb0ee10e45a2a597c39f66648895"
     }
   },
   "holdout": {

@@ -8,8 +8,6 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Protocol
 
-import joblib
-
 from jubii7.text import preprocess
 
 REVIEW_BELOW = 0.5  # send low-confidence lines to a person
@@ -54,6 +52,8 @@ class Predictor:
         actual = hashlib.sha256(model_path.read_bytes()).hexdigest()
         if actual != expected:
             raise ModelIntegrityError(f"{model_path.name} checksum mismatch")
+        import joblib  # lazy: the browser build (Pyodide) uses PortableModel and has no joblib
+
         # Safe: SHA-256 verified above and the file is produced by our own training run.
         return cls(joblib.load(model_path))  # nosec B301
 

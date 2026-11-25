@@ -22,7 +22,7 @@ nav{display:flex;gap:4px;flex-wrap:wrap}nav button{border:0;background:none;colo
 nav button.on{background:var(--bg);color:var(--ink);font-weight:600}
 main{max-width:1280px;margin:auto;padding:20px 16px 60px}section{display:none}section.on{display:block}
 h2{font-size:20px;margin:0 0 4px}h3{font-size:15px;margin:20px 0 8px}.sub{color:var(--muted);margin:0 0 16px}
-.grid{display:grid;gap:12px}.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(380px,1fr))}
+.grid{display:grid;gap:12px}.g4{grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr))}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
 .kpi .v{font-size:26px;font-weight:700}.kpi .l{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}.kpi .n{color:var(--muted);font-size:12px}
 table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -52,13 +52,24 @@ pre{margin:0;max-height:70vh;overflow:auto;border-radius:8px;font-size:12px}pre 
 .md h1{font-size:22px}.md h2{font-size:18px;margin-top:20px}.btn.on{border-color:var(--accent);color:var(--accent)}
 .note{background:var(--infobg);border-radius:10px;padding:10px 12px;font-size:13px}
 [dir=auto]{unicode-bidi:plaintext}
+.card{overflow-x:auto;min-width:0}nav{overflow-x:auto;scrollbar-width:none;max-width:100%}nav button{white-space:nowrap}
+.progress{height:8px;background:var(--code);border-radius:99px;overflow:hidden;margin-top:6px}.progress div{height:100%;background:var(--accent);transition:width .2s}
+@media (max-width:640px){
+  .bar{padding:10px 12px;gap:8px}nav{flex-wrap:nowrap;width:100%}main{padding:14px 12px 48px}
+  h2{font-size:18px}.kpi .v{font-size:21px}textarea{height:240px}
+  textarea,input{font-size:16px}.btn{padding:10px 14px}
+  .pipe{flex-direction:column}.arrow{transform:rotate(90deg);align-self:center}
+  th,td{padding:6px 5px}
+}
 </style>
 </head>
 <body>
 <header><div class="bar">
   <div class="brand">jubii<span>.7</span> · Invoice Reader</div>
+  <span id="pyStatus" class="badge OK" style="display:none"></span>
   <nav id="nav">
     <button data-t="overview" class="on">Overview</button>
+    <button data-t="scan">Scan document</button>
     <button data-t="invoice">Invoice check</button>
     <button data-t="classify">Line classifier</button>
     <button data-t="model">Model evaluation</button>
@@ -84,6 +95,30 @@ pre{margin:0;max-height:70vh;overflow:auto;border-radius:8px;font-size:12px}pre 
   <div class="grid g4" id="kpis"></div>
   <h3>Quality gates</h3>
   <div class="grid g4" id="gates"></div>
+</section>
+
+<section id="scan">
+  <h2>Scan document</h2>
+  <p class="sub">Photograph an invoice or upload an image / PDF. Text recognition (Tesseract.js, Arabic + English) runs <b>on your device</b>: the document is never uploaded. The text is then analysed by the package's Python code: line items, quantity × price = amount, dates, TRNs, VAT and line categories.</p>
+  <div class="grid g2">
+    <div class="card">
+      <div class="row">
+        <label class="btn primary" for="scanCamera">Scan with camera</label>
+        <input id="scanCamera" type="file" accept="image/*" capture="environment" hidden>
+        <label class="btn" for="scanUpload">Upload image or PDF</label>
+        <input id="scanUpload" type="file" accept="image/*,application/pdf" hidden>
+        <button class="btn" id="scanSample">Try the sample scan</button>
+      </div>
+      <div id="ocrProgress" class="muted" style="margin:10px 0"></div>
+      <canvas id="scanCanvas" style="width:100%;border-radius:8px;border:1px solid var(--line);display:none"></canvas>
+    </div>
+    <div class="card">
+      <div class="row" style="margin-bottom:8px"><b style="flex:1">Recognised text <span class="muted">(fix misreads, then analyse)</span></b><button class="btn primary" id="scanAnalyse">Analyse text</button></div>
+      <textarea id="ocrText" dir="auto" spellcheck="false" placeholder="The recognised text appears here. You can also paste text."></textarea>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px" id="scanResult"><span class="muted">Results appear here.</span></div>
+  <p class="muted" style="font-size:12px">Text-level checks only. Mapping every field into the structured invoice needs layout and table detection (production design in docs/ARCHITECTURE.md); the full 12-rule checker then runs on the result, as in the Invoice check tab.</p>
 </section>
 
 <section id="invoice">
@@ -181,8 +216,60 @@ const pct = v => v == null ? "–" : (v * 100).toFixed(0) + "%";
 const f3 = v => v == null ? "–" : Number(v).toFixed(3);
 const money = v => Number(v).toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
 const badge = (t, cls) => `<span class="badge ${esc(cls || t)}">${esc(t)}</span>`;
-const api = async (url, opts) => { const r = await fetch(url, opts); if (!r.ok) throw new Error((await r.text()) || r.status); return r.json(); };
-const post = (url, body) => api(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+const STATIC = !!window.JUBII7_STATIC;  // GitHub Pages build: no server, Python runs in the browser
+const http = async (url, opts) => { const r = await fetch(url, opts); if (!r.ok) throw new Error((await r.text()) || r.status); return r.json(); };
+
+// ---- static mode: same requests, answered from pre-built JSON + Pyodide ----
+let filesCache = null, pyReady = null;
+async function staticGet(url) {
+  const u = new URL(url, location.href), p = u.pathname.split("/api/")[1];
+  if (p === "dashboard") return http("data/dashboard.json");
+  if (p === "sample-invoice") return http(`data/invoice_${u.searchParams.get("variant") || "original"}.json`);
+  filesCache ||= await http("data/files.json");
+  if (p === "files") return Object.keys(filesCache);
+  if (p === "file") { const path = u.searchParams.get("path"); if (!(path in filesCache)) throw new Error("file not available"); return {path, content: filesCache[path]}; }
+  throw new Error("unknown route " + url);
+}
+function setPyStatus(text, cls) { const el = $("#pyStatus"); if (el) { el.textContent = text; el.className = "badge " + cls; } }
+function python() {
+  pyReady ||= (async () => {
+    setPyStatus("loading Python (Pyodide)…", "WARN");
+    await new Promise((ok, fail) => { const s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"; s.onload = ok; s.onerror = fail; document.head.appendChild(s); });
+    const py = await loadPyodide();
+    const bundle = await http("py/bundle.json");
+    for (const [path, src] of Object.entries(bundle)) { py.FS.mkdirTree("/app/" + path.slice(0, path.lastIndexOf("/"))); py.FS.writeFile("/app/" + path, src); }
+    py.FS.writeFile("/app/model_portable.json", await (await fetch("py/model_portable.json")).text());
+    py.runPython(`
+import json, sys
+sys.path.insert(0, "/app")
+from jubii7.classifier.cascade import Cascade, ModelClassifier, RuleClassifier
+from jubii7.classifier.portable import PortableModel
+from jubii7.classifier.predictor import Predictor
+from jubii7.invoice.checker import default_checker
+from jubii7.invoice.loader import parse_invoice
+_checker = default_checker()
+with open("/app/model_portable.json", encoding="utf-8") as f:
+    _classifier = Cascade([RuleClassifier(), ModelClassifier(Predictor(PortableModel(json.load(f))))])
+def check_json(text): return json.dumps(_checker.run(parse_invoice(json.loads(text))).to_dict(), ensure_ascii=False)
+def predict_json(text): return json.dumps(_classifier.predict(text).to_dict(), ensure_ascii=False)
+from jubii7.scan import analyse
+def scan_json(text): return json.dumps(analyse(text, _classifier).to_dict(), ensure_ascii=False)
+`);
+    setPyStatus("Python running in your browser", "OK");
+    return py;
+  })().catch(e => { pyReady = null; setPyStatus("Python failed to load", "ERROR"); throw e; });
+  return pyReady;
+}
+async function staticPost(url, body) {
+  const py = await python(), call = (fn, arg) => { try { return JSON.parse(py.globals.get(fn)(arg)); } catch (e) { throw new Error(String(e.message).split("\n").filter(Boolean).pop()); } };
+  if (url === "/invoice/check") return call("check_json", JSON.stringify(body));
+  if (url === "/predict") return call("predict_json", body.text);
+  if (url === "/predict/batch") return body.lines.map(l => call("predict_json", l.text));
+  if (url === "/scan/analyse") return call("scan_json", body.text);
+  throw new Error("unknown route " + url);
+}
+const api = (url, opts) => STATIC ? staticGet(url) : http(url, opts);
+const post = (url, body) => STATIC ? staticPost(url, body) : http(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 document.querySelectorAll("#nav button").forEach(b => b.onclick = () => {
@@ -196,10 +283,16 @@ if (startTab) document.querySelector(`#nav [data-t="${startTab}"]`)?.click();
 
 let D = {};
 async function boot() {
+  if (STATIC) {
+    $("#pyStatus").style.display = "inline-block"; setPyStatus("static site", "INFO");
+    document.querySelectorAll(".sub .live-note").forEach(n => n.remove());
+    $("#overview .sub").insertAdjacentHTML("beforeend", ` <b>On this site the checker and classifier run as the package's own Python code inside your browser (Pyodide, WebAssembly): no server.</b> <a href="https://github.com/mohammedsohail-virufy/jubii7-invoice-reader">Source on GitHub</a>.`);
+  }
   D = await api("/api/dashboard");
   renderOverview(); renderModel(); renderQuality();
   await loadInvoice("original"); runCheck();
   loadFiles(); loadDocs();
+  if (new URLSearchParams(location.search).has("demo") && location.hash === "#scan") ocr("sample-scan.png");  // shareable demo link
 }
 
 // ---------- overview ----------
@@ -225,6 +318,73 @@ function gateCards() {
   if (!s) return `<div class="card muted">Run <span class="mono">python scripts/quality.py</span> to populate.</div>`;
   const label = {tests: "pytest + coverage", lint: "ruff lint", format: "ruff format", types: "mypy --strict", security: "bandit (SAST)", deps: "pip-audit (CVEs)", complexity: "radon CC", maintainability: "radon MI"};
   return Object.entries(s).map(([k, v]) => `<div class="card kpi"><div class="l">${esc(label[k] || k)}</div><div class="v">${badge(v.passed ? "PASS" : "FAIL")}</div><div class="n">${v.seconds}s</div></div>`).join("");
+}
+
+// ---------- scan document ----------
+const loadScript = src => new Promise((ok, fail) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => fail(new Error("could not load " + src)); document.head.appendChild(s); });
+function progress(label, p) { $("#ocrProgress").innerHTML = `${esc(label)}${p == null ? "" : ` · ${Math.round(p * 100)}%`}<div class="progress"><div style="width:${(p ?? 0) * 100}%"></div></div>`; }
+async function drawToCanvas(source) {
+  const canvas = $("#scanCanvas"), ctx = canvas.getContext("2d", {willReadFrequently: true});
+  if (source.type === "application/pdf") {
+    progress("Reading PDF (first page)…");
+    if (!window.pdfjsLib) {
+      await loadScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js");
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+    const pdf = await pdfjsLib.getDocument({data: await source.arrayBuffer()}).promise;
+    const pg = await pdf.getPage(1), vp = pg.getViewport({scale: 2.5});
+    canvas.width = vp.width; canvas.height = vp.height;
+    await pg.render({canvasContext: ctx, viewport: vp}).promise;
+  } else {
+    const img = new Image(); img.src = typeof source === "string" ? source : URL.createObjectURL(source); await img.decode();
+    const scale = Math.min(1, 2200 / Math.max(img.width, img.height));
+    canvas.width = img.width * scale; canvas.height = img.height * scale;
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  }
+  // Clean-up for OCR: greyscale + contrast stretch (phone photos are often grey and low-contrast).
+  const d = ctx.getImageData(0, 0, canvas.width, canvas.height), px = d.data; let lo = 255, hi = 0;
+  for (let i = 0; i < px.length; i += 4) { const g = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]; px[i] = g; if (g < lo) lo = g; if (g > hi) hi = g; }
+  const span = Math.max(1, hi - lo);
+  for (let i = 0; i < px.length; i += 4) { const v = (px[i] - lo) * 255 / span; px[i] = px[i + 1] = px[i + 2] = v; }
+  ctx.putImageData(d, 0, 0); canvas.style.display = "block";
+  return canvas;
+}
+let ocrWorker = null;
+async function ocr(source) {
+  try {
+    const canvas = await drawToCanvas(source);
+    if (!window.Tesseract) { progress("Loading text recognition…"); await loadScript("https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"); }
+    ocrWorker ||= await Tesseract.createWorker(["eng", "ara"], 1, {logger: m => progress(m.status, m.progress)});
+    progress("Recognising text…", 0);
+    const {data} = await ocrWorker.recognize(canvas);
+    $("#ocrText").value = data.text;
+    progress(`Done · OCR confidence ${Math.round(data.confidence)}%`, 1);
+    analyseScan();
+  } catch (e) { $("#ocrProgress").innerHTML = `<span class="err">${esc(e.message || e)}</span>`; }
+}
+$("#scanCamera").onchange = e => e.target.files[0] && ocr(e.target.files[0]);
+$("#scanUpload").onchange = e => e.target.files[0] && ocr(e.target.files[0]);
+$("#scanSample").onclick = () => ocr("sample-scan.png");
+$("#scanAnalyse").onclick = analyseScan;
+async function analyseScan() {
+  const text = $("#ocrText").value.trim(); if (!text) return;
+  $("#scanResult").innerHTML = `<span class="muted">Analysing…</span>`;
+  let r;
+  try { r = await post("/scan/analyse", {text}); } catch (e) { $("#scanResult").innerHTML = `<span class="err">${esc(e.message)}</span>`; return; }
+  const s = r.summary;
+  const mathsBadge = l => l.maths === "ok" ? badge("✓ maths", "OK") : l.maths === "mismatch" ? badge("✗ maths", "ERROR") : badge("n/a", "skipped");
+  const lines = r.lines.length
+    ? `<table><tr><th>Line</th><th>Numbers</th><th>Qty × price = amount</th><th>Category</th><th>Route</th></tr>${r.lines.map(l =>
+        `<tr><td dir="auto">${esc(l.description)}</td><td class="mono">${l.numbers.map(n => n.toLocaleString("en-US")).join(" · ")}</td>
+         <td>${mathsBadge(l)} <span class="muted">${esc(l.maths_detail)}</span></td><td><b>${esc(l.category || "–")}</b> <span class="muted">${esc(l.source)}</span></td>
+         <td>${l.needs_review ? badge("review", "WARN") : badge("auto", "OK")}</td></tr>`).join("")}</table>`
+    : `<p class="muted">No line items found (a line item needs a description and at least two numbers).</p>`;
+  $("#scanResult").innerHTML = `<div class="row">${badge(s.line_items + " line items", "INFO")} ${badge(s.maths_checked + " maths checked", "INFO")}
+      ${badge(s.errors + " errors", s.errors ? "ERROR" : "OK")} ${badge(s.needs_review + " lines for review", s.needs_review ? "WARN" : "OK")}</div>
+    <h3>Line items</h3>${lines}
+    <div class="grid g2"><div><h3>Dates</h3>${r.dates.map(d => `${badge(d.valid ? "valid" : "invalid", d.valid ? "OK" : "ERROR")} <span class="mono">${esc(d.date)}</span>`).join("<br>") || "<span class='muted'>none found</span>"}</div>
+    <div><h3>TRNs (15 digits)</h3>${r.trns.map(x => `<span class="mono">${esc(x)}</span>`).join("<br>") || "<span class='muted'>none found</span>"}</div></div>
+    <h3>Issues</h3>${r.issues.length ? `<table>${r.issues.map(i => `<tr><td>${badge(i.severity)}</td><td dir="auto">${esc(i.issue)}</td><td class="mono muted">${esc(i.check)}</td></tr>`).join("")}</table>` : "<span class='ok'>No issues found in the text.</span>"}`;
 }
 
 // ---------- invoice ----------
@@ -310,7 +470,7 @@ function renderModel() {
   const caps = {"01": "Model comparison: mean ± std macro-F1 over 25 CV folds.", "02": "Spread of macro-F1 across folds: small data means wide spread.", "03": "Per-class precision / recall / F1 on the hold-out split.",
     "04": "Confusion matrix on the hold-out split.", "05": "Learning curve: validation still rising → more labels help most.", "06": "Regularisation curve for logistic regression (C).",
     "07": "SGD learning-rate sweep.", "08": "Training loss and validation F1 per epoch at three learning rates.", "09": "Rules → model vs model on the unseen challenge set (honest).", "10": "Same comparison under CV on the training rows (optimistic for the rules)."};
-  $("#figures").innerHTML = (D.figures || []).map(f => `<figure class="card"><img src="/figures/${esc(f)}" alt="${esc(f)}" loading="lazy"><figcaption>${esc(caps[f.slice(0, 2)] || f)}</figcaption></figure>`).join("");
+  $("#figures").innerHTML = (D.figures || []).map(f => `<figure class="card"><img src="figures/${esc(f)}" alt="${esc(f)}" loading="lazy"><figcaption>${esc(caps[f.slice(0, 2)] || f)}</figcaption></figure>`).join("");
 }
 
 // ---------- quality ----------

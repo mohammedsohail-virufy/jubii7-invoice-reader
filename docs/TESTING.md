@@ -23,6 +23,8 @@ the same gates on every push (`.github/workflows/ci.yml`).
 | **API / integration tests** | FastAPI TestClient | endpoints, status codes, input validation (empty, too long, bad JSON → 422) | `test_api.py`, `test_dashboard.py` |
 | **Security tests** | pytest | path traversal (`../../`, absolute paths, `.venv`, model files) is blocked; a tampered model file is refused | `test_code_browser_blocks_path_traversal...`, `test_tampered_model_is_refused` |
 | **End-to-end test** | pytest | train on a temp copy of the data → model card → load → predict an Arabic line | `test_predictor_end_to_end` |
+| **Parity test** | pytest + numpy | the browser model (JSON weights, pure Python) gives the same probabilities as scikit-learn to 1e-9 on every labelled row, for word and char n-grams | `tests/test_portable.py` |
+| **OCR-text tests** | pytest | realistic OCR output (mixed Arabic/Western digits): finds the 4 line items, skips totals, catches 24 × 65 ≠ 1,650, the invalid date, the TRN and the VAT base | `tests/test_scan.py` |
 | **Model quality gate** | pytest | the trained model must beat the majority-class baseline by a wide margin | `test_model_beats_majority_baseline` |
 | **Coverage** | pytest-cov | 90% of lines executed by tests; uncovered lines listed per file | `reports/quality/coverage.json` |
 

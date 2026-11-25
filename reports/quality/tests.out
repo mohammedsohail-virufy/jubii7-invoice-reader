@@ -1,5 +1,5 @@
-........................................................................ [ 74%]
-.........................                                                [100%]
+........................................................................ [ 64%]
+.......................................                                  [100%]
 ============================== warnings summary ===============================
 .venv\Lib\site-packages\fastapi\testclient.py:1
   D:\Projects\jubii7-invoice-reader\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
@@ -13,17 +13,18 @@ Name                                       Stmts   Miss  Cover   Missing
 ------------------------------------------------------------------------
 src\jubii7\__init__.py                         1      0   100%
 src\jubii7\api\__init__.py                     0      0   100%
-src\jubii7\api\app.py                         56      6    89%   37-38, 50-53
+src\jubii7\api\app.py                         62      7    89%   42-43, 55-58, 96
 src\jubii7\classifier\__init__.py              3      0   100%
 src\jubii7\classifier\cascade.py              35      0   100%
 src\jubii7\classifier\data.py                 34      1    97%   47
 src\jubii7\classifier\evaluate.py            124     29    77%   208-219, 226-231, 236-241, 252-270, 274
 src\jubii7\classifier\models.py               40      0   100%
 src\jubii7\classifier\plots.py               116     36    69%   31-40, 59-63, 67-71, 75-79, 83-93
+src\jubii7\classifier\portable.py             57      1    98%   30
 src\jubii7\classifier\predictor.py            41      0   100%
 src\jubii7\classifier\rules.py                26      0   100%
 src\jubii7\classifier\tracking.py             39     14    64%   44-48, 51-58, 67-71
-src\jubii7\classifier\train.py               125     18    86%   208-227
+src\jubii7\classifier\train.py               129     18    86%   209-228
 src\jubii7\invoice\__init__.py                 4      0   100%
 src\jubii7\invoice\checker.py                 47      1    98%   60
 src\jubii7\invoice\checks\__init__.py          7      0   100%
@@ -38,12 +39,13 @@ src\jubii7\invoice\profiling.py               31      0   100%
 src\jubii7\invoice\totals.py                  22      0   100%
 src\jubii7\puzzle\__init__.py                  0      0   100%
 src\jubii7\puzzle\solver.py                   39      0   100%
+src\jubii7\scan.py                           102      4    96%   81-82, 103, 109
 src\jubii7\text.py                            18      0   100%
 src\jubii7\track_c\__init__.py                 0      0   100%
 src\jubii7\track_c\geometry.py                 9      0   100%
 src\jubii7\track_c\metrics.py                 12      0   100%
 src\jubii7\web\__init__.py                     0      0   100%
-src\jubii7\web\dashboard.py                   91      5    95%   69, 89, 101, 109-110
+src\jubii7\web\dashboard.py                   94      6    94%   69, 89, 101, 109-110, 172
 ------------------------------------------------------------------------
-TOTAL                                       1163    116    90%
+TOTAL                                       1335    123    91%
 Coverage JSON written to file D:\Projects\jubii7-invoice-reader\reports\quality\coverage.json

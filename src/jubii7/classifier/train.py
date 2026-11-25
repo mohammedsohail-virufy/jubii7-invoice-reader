@@ -35,6 +35,7 @@ from jubii7.classifier.evaluate import (
     regularisation_curve_data,
 )
 from jubii7.classifier.models import CANDIDATES, LogRegSpec, ModelSpec, SgdSpec
+from jubii7.classifier.portable import export_model
 from jubii7.classifier.rules import KeywordRules
 from jubii7.classifier.tracking import ExperimentTracker, make_tracker
 
@@ -241,6 +242,9 @@ def save_model(
     final = best.build().fit(dataset.texts, dataset.labels)
     paths.model.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(final, paths.model)
+    if isinstance(best, LogRegSpec):  # browser-portable copy for the GitHub Pages demo
+        portable = json.dumps(export_model(final), ensure_ascii=False)
+        (paths.model.parent / "model_portable.json").write_text(portable, encoding="utf-8")
     card: dict[str, object] = {
         "model": best.name,
         "params": best.params(),

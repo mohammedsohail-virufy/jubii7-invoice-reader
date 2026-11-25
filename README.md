@@ -1,8 +1,11 @@
 # jubii.7 Live Challenge · Track A: Read the messy invoice
 
+**Live demo: [https://mohammedsohail-virufy.github.io/jubii7-invoice-reader/](https://mohammedsohail-virufy.github.io/jubii7-invoice-reader/)** (works on mobile). Scan or upload an invoice, check it, classify lines, and review the tests, scans and model curves. Try the sample scan: [https://mohammedsohail-virufy.github.io/jubii7-invoice-reader/?demo#scan](https://mohammedsohail-virufy.github.io/jubii7-invoice-reader/?demo#scan)
+
 Validation and classification core for a document-scanning pipeline. It takes a bilingual
 (Arabic/English) building-materials tax invoice, already extracted to JSON, and:
 
+0. **scans** a photo or PDF: on-device OCR (Arabic + English), then line maths, dates, TRNs, VAT and line categories from the text
 1. **profiles** it: Arabic-Indic digits, gaps, and fields flagged to verify on the scan
 2. **checks** it: 12 business rules, recomputing every total from the line items
 3. **classifies** each line item: bilingual rules first, then an ML model; unsure lines go to a person
@@ -21,7 +24,7 @@ scan ─► OCR/layout ─► JSON ─► profile ─► check (12 rules) ─►
 | **Root causes** | sand line 24 × 65 = 1,560 (printed 1,650); VAT charged on the pre-discount total; words ≠ figure; Cash + Credit both ticked; 45 vs ٣٠ days; 31/11 is not a date |
 | **Model** (5×5 repeated stratified k-fold) | macro-F1 **0.846 ± 0.109** (word TF-IDF + logistic regression, best of 3) |
 | **Unseen challenge set** (30 new lines) | model alone 0.655 → **rules → model 0.754**; lines decided automatically 23% → **63%** at 95% accuracy |
-| **Quality gates** | 97 tests pass · 90% coverage · ruff, mypy --strict, bandit, pip-audit (0 CVEs), radon: all pass |
+| **Quality gates** | 111 tests pass · 90% coverage · ruff, mypy --strict, bandit, pip-audit (0 CVEs), radon: all pass |
 | **Puzzle** | brute force over 5!³ assignments, exactly one survives: **Chen is the chef, Dev lives in Abu Dhabi** |
 
 ## Quick start (about 3 minutes)
@@ -41,13 +44,16 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db    # optional: compare runs in
 
 Docker: `docker build -t jubii7 . && docker run -p 8000:8000 jubii7`
 
+Static site: `python scripts/build_site.py` writes `site/` (deployed by `.github/workflows/pages.yml`).
+
 ## Dashboard
 
-`jubii7 serve` opens a local review dashboard with six tabs:
+`jubii7 serve` opens the review dashboard locally; the same page is published to GitHub Pages, where the checker, classifier and scan analysis run as this package's Python code inside the browser (Pyodide), with no server.
 
 | Tab | What you can do |
 |---|---|
 | Overview | pipeline, headline numbers, quality-gate status |
+| Scan document | phone camera or upload (image / PDF), on-device OCR, editable text, line items with qty × price = amount, dates, TRNs, VAT, categories |
 | Invoice check | edit the extracted JSON, run the checker live, see issues and printed vs recomputed totals |
 | Line classifier | classify any EN/AR line and see the decision path: rules → model → human review |
 | Model evaluation | candidate runs, interactive learning / learning-rate / epoch / regularisation curves, challenge set row by row, CV mistakes, all figures |
@@ -61,6 +67,7 @@ Docker: `docker build -t jubii7 . && docker run -p 8000:8000 jubii7`
 | GET | `/health` | liveness + version |
 | POST | `/predict` | `{"text": "..."}` → category, confidence, `needs_review`, `source` (rules/model), `reason`, top 3 |
 | POST | `/predict/batch` | up to 200 lines |
+| POST | `/scan/analyse` | raw OCR text → line items (maths checked, classified), dates, TRNs, VAT issues |
 | POST | `/invoice/check` | extracted invoice JSON → status, issues by severity, corrected totals, profile |
 
 Input is validated (1–500 characters per line; 422 on bad JSON). The model file is loaded only
@@ -76,9 +83,11 @@ src/jubii7/
   classifier/             data · models (specs) · rules · cascade · evaluate · plots · tracking · train · predictor
   api/app.py              FastAPI, dependency-injected
   web/                    dashboard routes + single-page UI
+  scan.py                 OCR text -> line items, maths, dates, TRNs, VAT (pure Python)
+  classifier/portable.py  model as JSON weights, scored in pure Python (browser build)
   puzzle/solver.py        warm-up
   track_c/                IoU and precision/recall/F1 as tested code
-tests/                    97 tests: unit, property-based, contract (Liskov), API, security, end-to-end training
+tests/                    111 tests: unit, property-based, contract (Liskov), API, security, end-to-end training
 scripts/quality.py        runs every quality gate
 data/                     invoice JSON (+ corrected copy), labelled lines, labelling guide, unseen challenge set
 reports/                  evaluation.json, figures/, challenge predictions, CV mistakes, quality/

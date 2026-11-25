@@ -20,6 +20,7 @@ from jubii7.classifier.cascade import Cascade, LineClassifier, ModelClassifier, 
 from jubii7.classifier.predictor import Predictor
 from jubii7.invoice.checker import InvoiceChecker, default_checker
 from jubii7.invoice.loader import InvoiceFormatError, parse_invoice
+from jubii7.scan import analyse
 
 ROOT = Path(os.environ.get("JUBII7_ROOT", Path.cwd()))
 
@@ -30,6 +31,10 @@ class LineIn(BaseModel):
 
 class BatchIn(BaseModel):
     lines: list[LineIn] = Field(min_length=1, max_length=200)
+
+
+class ScanIn(BaseModel):
+    text: str = Field(min_length=1, max_length=20_000, description="raw OCR text of one page")
 
 
 def default_classifier(root: Path = ROOT) -> LineClassifier:
@@ -84,6 +89,11 @@ def create_app(
         except InvoiceFormatError as error:
             raise HTTPException(422, str(error)) from error
         return invoice_checker.run(parsed).to_dict()
+
+    @app.post("/scan/analyse")
+    def scan_analyse(scan: ScanIn) -> dict[str, object]:
+        """OCR text -> line items (maths checked, classified), dates, TRNs, VAT check."""
+        return analyse(scan.text, lazy.get()).to_dict()
 
     if with_dashboard:
         from jubii7.web.dashboard import mount_dashboard

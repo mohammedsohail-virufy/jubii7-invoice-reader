@@ -10,3 +10,4 @@ __pycache__/
 mlruns/
 mlflow.db
 reports/quality/*.err
+site/
