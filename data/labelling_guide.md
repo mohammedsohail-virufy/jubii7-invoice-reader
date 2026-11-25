@@ -1,4 +1,4 @@
-# Labelling guide (5 lines)
+# Labelling guide
 
 1. **cement**: binders sold by the bag or tonne: OPC/Portland, SRC, white cement, ready-mix bags, tile adhesive and grout that are cement-based.
 2. **steel**: anything metal used for structure: rebar (any mm), mesh, binding wire, steel sections, anchor bolts.
