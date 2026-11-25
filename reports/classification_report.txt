@@ -1,0 +1,11 @@
+              precision    recall  f1-score   support
+
+      cement       0.75      1.00      0.86         3
+       steel       0.50      0.67      0.57         3
+  aggregates       1.00      0.50      0.67         4
+      blocks       1.00      1.00      1.00         4
+    services       0.75      0.75      0.75         4
+
+    accuracy                           0.78        18
+   macro avg       0.80      0.78      0.77        18
+weighted avg       0.82      0.78      0.78        18

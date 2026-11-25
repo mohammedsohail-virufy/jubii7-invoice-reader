@@ -1,0 +1,22 @@
+# Findings during the build
+
+What went wrong or looked wrong while building this, how it was found, and what was done.
+Kept as part of the deliverable because catching these is the engineering work.
+
+| # | Area | Finding | How it was caught | Decision / fix |
+|---|---|---|---|---|
+| 1 | Model evaluation | The rules → model cascade scored a **perfect 1.00** under cross-validation. | A perfect score on 57 rows is a red flag. The keyword rules were written by someone who had read those same rows: **leakage**. | Kept the CV number but labelled it "optimistic". Built a 30-line **unseen challenge set** from the labelling guide only. Honest result: 0.655 → 0.754 macro-F1. |
+| 2 | Rules | On the unseen set the rules mislabel **شحن حديد إلى الموقع** (shipping steel to site) as steel. "شحن" (shipping) is not in the service word list. | Row-by-row challenge predictions (`reports/challenge_predictions.csv`). | **Not patched**: fixing rules to fit the test set would leak it too. Logged as a known limit; the fix belongs in a synonym list grown from reviewed lines. |
+| 3 | Model | Unseen vocabulary (TMT bars, crusher run, بحص, طوب) gets confidence ≈ 0.27, close to uniform. | Challenge set + confidence column. | Correct behaviour: those lines go to review. Improvement plan: multilingual embeddings (MODEL_REPORT.md). |
+| 4 | Model selection | The hold-out split ranks char n-grams first (0.826), CV ranks word n-grams first (0.846). | Comparing both columns. | Chose by CV: 18 test rows means one line moves F1 by about 0.06, and the CV spread (± 0.11) shows the models are close. |
+| 5 | Learning curve | Validation F1 still rising at 45 rows (0.53 → 0.89); training F1 always 1.0. | Learning-curve figure. | Diagnosis: data-limited (variance), so more labels beat more tuning. The C and learning-rate curves are flat, which confirms it. |
+| 6 | Invoice rules | Comparing VAT with the *recomputed* taxable amount only shows a knock-on error, not the cause. | Working the VAT by hand. | The VAT rule compares against the *printed* taxable amount and names the root cause: "VAT charged on the pre-discount total". |
+| 7 | Invoice rules | The original script hard-coded "2% of group index 1". | Code review for production readiness. | Discount rate and group are now parsed from the printed label ("Discount 2% on Site B"); an unknown group raises a clear format error. |
+| 8 | Experiment tracking | MLflow 3 refused the local file store ("maintenance mode"), and `mlflow-skinny` does not support SQLite. | First training run. | Moved to the SQLite backend with full MLflow. The tracker interface also falls back to a local JSON log, so training never fails because tracking is down. |
+| 9 | Model security | MLflow 3 serialises scikit-learn models with **skops** and refused the custom text preprocessor as an "untrusted type". | Training run error. | Trust exactly one type, `jubii7.text.preprocess`. For the API, the joblib file is loaded only after its SHA-256 matches the model card; a test proves a tampered file is refused. |
+| 10 | Security scan | bandit's JSON report was unreadable: its warnings were mixed into the same output. Also, words after `# nosec` were read as rule IDs. | Dashboard showed no bandit data. | stdout and stderr are saved separately; each suppression is now `# nosec B301` with the reason on the line above. Result: 0 findings. |
+| 11 | Code quality | ruff flagged 2 functions over the complexity limit (8) and 2 with too many positional arguments; mypy --strict found 9 type errors. | `scripts/quality.py`. | Refactored rather than suppressed: training split into typed stage functions, keyword-only arguments, a typed `HoldoutReport`, a `LazyClassifier` class. All gates pass. |
+| 12 | Tests | Hypothesis rejected a property test written with `*args`. | First test run. | Rewrote it to draw an 8-integer list. |
+| 13 | Dashboard security | A code browser that reads files by path is a path-traversal risk. | Threat-modelling the feature. | Whitelisted folders and file types, path resolution checks, a size limit, and 6 attack-path tests (`../../`, absolute paths, `.venv`, model files, database). |
+| 14 | Data | Waterproofing membrane fits none of the 5 classes. | Labelling. | Marked `unmapped`, kept out of training, routed to review; proposed a 6th class. |
+| 15 | Data | The AI labelled "delivery of cement bags" as cement. | Checking every AI label against the guide. | Relabelled as services (the guide says: label what is billed). Tagged `ai_generated_fixed`. |

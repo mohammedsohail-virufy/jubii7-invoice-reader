@@ -1,0 +1,58 @@
+text,label,source
+Portland cement 50 kg,cement,invoice
+أسمنت بورتلاند ٥٠ كجم,cement,invoice
+Rebar 12 mm,steel,invoice
+حديد تسليح ١٢ مم,steel,invoice
+Washed sand,aggregates,invoice
+رمل مغسول,aggregates,invoice
+Concrete block 20 cm,blocks,invoice
+بلوك خرساني ٢٠ سم,blocks,invoice
+Delivery charge,services,invoice
+رسوم التوصيل,services,invoice
+Sulphate resistant cement SRC 50kg bag,cement,ai_generated
+OPC cement bulk per tonne,cement,ai_generated
+White cement 40 kg,cement,ai_generated
+Cement-based tile adhesive 20 kg,cement,ai_generated
+أسمنت مقاوم للكبريتات ٥٠ كجم,cement,ai_generated
+أسمنت أبيض ٤٠ كجم,cement,ai_generated
+أسمنت عادي سائب بالطن,cement,ai_generated
+لاصق بلاط أسمنتي ٢٠ كجم,cement,ai_generated
+Rebar 16 mm grade 60,steel,ai_generated
+Steel mesh A193 sheet,steel,ai_generated
+Binding wire 1.6 mm coil,steel,ai_generated
+Steel I-beam 200 mm,steel,ai_generated
+Anchor bolts M16,steel,ai_generated
+حديد تسليح ١٦ مم,steel,ai_generated
+شبك حديد ملحوم,steel,ai_generated
+سلك ربط حديد لفة,steel,ai_generated
+كمرة حديد ٢٠٠ مم,steel,ai_generated
+Dune sand per m3,aggregates,ai_generated
+Gravel 20 mm,aggregates,ai_generated
+Crushed gabbro 10 mm,aggregates,ai_generated
+Road base material per tonne,aggregates,ai_generated
+Black sand for plaster,aggregates,ai_generated
+رمل صحراوي متر مكعب,aggregates,ai_generated
+حصى ٢٠ مم,aggregates,ai_generated
+كسارة جابرو ١٠ مم,aggregates,ai_generated
+رمل أسود للمحارة,aggregates,ai_generated
+Hollow block 15 cm,blocks,ai_generated
+Solid concrete block 10 cm,blocks,ai_generated
+Insulated thermal block 20 cm,blocks,ai_generated
+Interlock paver 8 cm grey,blocks,ai_generated
+Kerbstone 50 cm,blocks,ai_generated
+طابوق مجوف ١٥ سم,blocks,ai_generated
+بلوك مصمت ١٠ سم,blocks,ai_generated
+بلوك عازل حراري ٢٠ سم,blocks,ai_generated
+انترلوك رمادي ٨ سم,blocks,ai_generated
+بردورة رصيف ٥٠ سم,blocks,ai_generated
+Transport to site Ajman,services,ai_generated
+Crane hire per hour,services,ai_generated
+Concrete pump hire per day,services,ai_generated
+Labour charges unloading,services,ai_generated
+Cube test lab charges,services,ai_generated
+نقل إلى الموقع عجمان,services,ai_generated
+إيجار رافعة بالساعة,services,ai_generated
+أجور عمال تنزيل,services,ai_generated
+رسوم فحص مكعبات,services,ai_generated
+Delivery of cement bags to site,services,ai_generated_fixed
+توصيل أكياس أسمنت للموقع,services,ai_generated_fixed

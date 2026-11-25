@@ -1,0 +1,151 @@
+{
+  "_note": "Corrected copy of WB-2026-11-0457: every problem fixed. Used by tests and the dashboard as the passing example.",
+  "supplier": {
+    "name_en": "AL WAHA BUILDING MATERIALS TRADING LLC",
+    "name_ar": "الواحة لتجارة مواد البناء ذ.م.م",
+    "address": "Industrial Area 4, Sharjah, UAE",
+    "trn": "100000000000003"
+  },
+  "invoice_no": "WB-2026-11-0457",
+  "date": "14/11/2026",
+  "customer_ar": "مؤسسة النخيل للمقاولات العامة",
+  "customer_trn": "100099999990817",
+  "_verify_customer_trn": true,
+  "po_no": "NK/PO/٢٠٢٦/٣٨٩",
+  "salesman": "خالد م.",
+  "delivery_to_ar": "مشروع فيلا سكنية - قطعة ٢١٧، منطقة الياسمين، عجمان",
+  "payment": {
+    "cash": false,
+    "bank_transfer": false,
+    "cheque": false,
+    "credit": true
+  },
+  "groups": [
+    {
+      "name": "Site A - Foundation",
+      "lines": [
+        {
+          "no": 1,
+          "desc_en": "Portland cement 50 kg",
+          "desc_ar": "أسمنت بورتلاند ٥٠ كجم",
+          "unit": "كيس",
+          "ordered": "120",
+          "delivered": "120",
+          "unit_price": "18.50",
+          "amount": "2,220.00"
+        },
+        {
+          "no": 2,
+          "desc_en": "Rebar 12 mm",
+          "desc_ar": "حديد تسليح ١٢ مم",
+          "unit": "طن",
+          "ordered": "4",
+          "delivered": "4",
+          "unit_price": "2,750.00",
+          "amount": "11,000.00"
+        },
+        {
+          "no": 3,
+          "desc_en": "Washed sand",
+          "desc_ar": "رمل مغسول",
+          "unit": "m³",
+          "ordered": "٢٤",
+          "delivered": "٢٤",
+          "unit_price": "65.00",
+          "amount": "1,560.00"
+        }
+      ],
+      "subtotal": "14,780.00"
+    },
+    {
+      "name": "Site B - Walls & roof",
+      "lines": [
+        {
+          "no": 4,
+          "desc_en": "Concrete block 20 cm",
+          "desc_ar": "بلوك خرساني ٢٠ سم",
+          "unit": "حبة",
+          "ordered": "1,500",
+          "delivered": "1,500",
+          "unit_price": "3.20",
+          "amount": "4,800.00",
+          "_verify_amount": true
+        },
+        {
+          "no": 5,
+          "desc_en": "Waterproofing membrane",
+          "desc_ar": "رول عزل مائي",
+          "unit": "رول",
+          "ordered": "١٨",
+          "delivered": "١٨",
+          "unit_price": "145.00",
+          "amount": "2,610.00"
+        },
+        {
+          "no": 6,
+          "desc_en": "Delivery charge",
+          "desc_ar": "رسوم التوصيل",
+          "unit": "رحلة",
+          "ordered": "1",
+          "delivered": "1",
+          "unit_price": "350.00",
+          "amount": "350.00"
+        }
+      ],
+      "subtotal": "7,760.00"
+    }
+  ],
+  "totals": {
+    "total_before_discount": "22,540.00",
+    "discount_label": "Discount 2% on Site B",
+    "discount": "(155.20)",
+    "taxable_amount": "22,384.80",
+    "vat_rate": 0.05,
+    "vat": "1,119.24",
+    "grand_total": "23,504.04"
+  },
+  "amount_in_words_ar": "فقط ثلاثة وعشرون ألفاً وستمائة وستون درهماً وثلاثون فلساً لا غير",
+  "amount_in_words_value": "23,504.04",
+  "deliveries": [
+    {
+      "id": "D1",
+      "items": [
+        1,
+        2,
+        3
+      ],
+      "planned_date": "12/11/2026",
+      "driver": "راشد",
+      "vehicle": "SHJ 3 - 45120",
+      "received_by": "م. سعيد"
+    },
+    {
+      "id": "D2",
+      "items": [
+        4,
+        6
+      ],
+      "planned_date": "15/11/2026",
+      "driver": "راشد",
+      "vehicle": "SHJ 3 - 45120",
+      "received_by": "م. سعيد"
+    },
+    {
+      "id": "D3",
+      "items": [
+        5
+      ],
+      "planned_date": "30/11/2026",
+      "driver": "يوسف",
+      "vehicle": "AJM B - 7781",
+      "received_by": "م. سعيد",
+      "handwritten_note": "balance 2 rolls pending"
+    }
+  ],
+  "terms_en": "Payment due within 45 days of invoice date. Goods once delivered are not returnable. Prices include delivery inside Sharjah only.",
+  "terms_ar": "يستحق الدفع خلال ٣٠ يوماً من تاريخ الفاتورة. البضاعة المسلمة لا ترد. الأسعار تشمل التوصيل داخل الشارقة فقط.",
+  "terms_days_en": "45",
+  "terms_days_ar": "٤٥",
+  "stamp": "AL WAHA TRADING SHARJAH",
+  "customer_signature": "signed"
+}

@@ -1,0 +1,31 @@
+text,label,source,rule,model,model_confidence,cascade,automatic,correct
+Deformed bars Y20 TMT,steel,challenge,,services,0.273,services,False,False
+Steel sections HEB 160,steel,challenge,steel,steel,0.553,steel,True,True
+GI wire 2 mm roll,steel,challenge,,steel,0.661,steel,True,True
+قضبان حديد مشرشر ٢٠ مم,steel,challenge,steel,aggregates,0.425,steel,True,True
+زوايا حديد ٥٠×٥٠,steel,challenge,steel,steel,0.35,steel,True,True
+Cement OPC 42.5N bag,cement,challenge,cement,cement,0.695,cement,True,True
+Ordinary Portland 50kg x 200,cement,challenge,cement,cement,0.297,cement,True,True
+Tile grout grey 5 kg,cement,challenge,cement,cement,0.44,cement,True,True
+إسمنت مقاوم ٥٠ كيلو,cement,challenge,,cement,0.429,cement,False,True
+جراوت بلاط رمادي,cement,challenge,,blocks,0.259,blocks,False,False
+Aggregate 3/4 inch,aggregates,challenge,aggregates,services,0.273,aggregates,True,True
+Crusher run 0-40 mm,aggregates,challenge,,steel,0.361,steel,False,False
+Fine sand for plastering,aggregates,challenge,aggregates,aggregates,0.744,aggregates,True,True
+حجر مكسر ٣/٤ إنش,aggregates,challenge,,services,0.273,services,False,False
+بحص ناعم,aggregates,challenge,,services,0.273,services,False,False
+Red bricks 1000 pcs,blocks,challenge,blocks,services,0.273,blocks,True,True
+Thermal insulated blocks 25cm,blocks,challenge,blocks,blocks,0.331,blocks,True,True
+Kerb stones grey,blocks,challenge,blocks,blocks,0.331,blocks,True,True
+طوب أحمر ١٠٠٠ حبة,blocks,challenge,,services,0.273,services,False,False
+بلك ٢٠ مصمت,blocks,challenge,,blocks,0.392,blocks,False,True
+Scaffolding rental 1 week,services,challenge,services,services,0.273,services,True,True
+Site cleaning and debris removal,services,challenge,,services,0.563,services,True,True
+Freight charges Dubai,services,challenge,,services,0.652,services,True,True
+Forklift with operator,services,challenge,,services,0.273,services,False,True
+Concrete cube testing 6 nos,services,challenge,services,services,0.454,services,True,True
+أجرة شاحنة إلى دبي,services,challenge,,services,0.473,services,False,True
+إزالة مخلفات الموقع,services,challenge,,services,0.473,services,False,True
+فحص مختبر للمكعبات,services,challenge,services,services,0.485,services,True,True
+Transport of steel to site,services,challenge,services,services,0.695,services,True,True
+شحن حديد إلى الموقع,services,challenge,steel,services,0.472,steel,True,False

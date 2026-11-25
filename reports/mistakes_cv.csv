@@ -1,0 +1,8 @@
+text,label,source,predicted,confidence
+OPC cement bulk per tonne,cement,ai_generated,aggregates,0.431
+Anchor bolts M16,steel,ai_generated,services,0.272
+Gravel 20 mm,aggregates,ai_generated,steel,0.318
+Road base material per tonne,aggregates,ai_generated,cement,0.416
+Crane hire per hour,services,ai_generated,aggregates,0.461
+Concrete pump hire per day,services,ai_generated,aggregates,0.319
+توصيل أكياس أسمنت للموقع,services,ai_generated_fixed,cement,0.623

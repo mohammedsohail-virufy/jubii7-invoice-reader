@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jubii.7 Invoice Reader</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<style>
+:root{--bg:#f7f7f8;--panel:#fff;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#ea580c;--blue:#2563eb;
+--err:#dc2626;--errbg:#fef2f2;--warn:#b45309;--warnbg:#fffbeb;--info:#2563eb;--infobg:#eff6ff;--ok:#15803d;--okbg:#f0fdf4;--code:#f3f4f6}
+@media (prefers-color-scheme:dark){:root{--bg:#0b0d12;--panel:#151821;--ink:#e5e7eb;--muted:#9ca3af;--line:#262a36;
+--errbg:#2a1215;--warnbg:#2a2010;--infobg:#111c33;--okbg:#0f2318;--code:#0f1117}}
+*{box-sizing:border-box}body{margin:0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+.bar{max-width:1280px;margin:auto;padding:12px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.brand{font-weight:700;font-size:16px}.brand span{color:var(--accent)}
+nav{display:flex;gap:4px;flex-wrap:wrap}nav button{border:0;background:none;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font:inherit}
+nav button.on{background:var(--bg);color:var(--ink);font-weight:600}
+main{max-width:1280px;margin:auto;padding:20px 16px 60px}section{display:none}section.on{display:block}
+h2{font-size:20px;margin:0 0 4px}h3{font-size:15px;margin:20px 0 8px}.sub{color:var(--muted);margin:0 0 16px}
+.grid{display:grid;gap:12px}.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(380px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.kpi .v{font-size:26px;font-weight:700}.kpi .l{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}.kpi .n{color:var(--muted);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700}
+.ERROR,.failed,.FAIL{background:var(--errbg);color:var(--err)}.WARN{background:var(--warnbg);color:var(--warn)}
+.INFO{background:var(--infobg);color:var(--info)}.passed,.PASS,.OK{background:var(--okbg);color:var(--ok)}.skipped{background:var(--code);color:var(--muted)}
+textarea,input{width:100%;font:13px ui-monospace,Consolas,monospace;background:var(--code);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px}
+textarea{height:420px;resize:vertical}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;font:inherit}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.chip{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer;font-size:12px}
+.pipe{display:flex;gap:6px;align-items:stretch;flex-wrap:wrap}.step{flex:1;min-width:120px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+.step b{display:block;font-size:13px}.step small{color:var(--muted)}.arrow{align-self:center;color:var(--muted)}
+.step.live{border-color:var(--accent)}
+.path{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}.node{padding:6px 10px;border-radius:8px;border:1px solid var(--line);font-size:12px}
+.node.hit{border-color:var(--accent);background:var(--warnbg)}.node.skip{opacity:.45}
+.barwrap{background:var(--code);border-radius:6px;height:16px;overflow:hidden}.barfill{height:100%;background:var(--blue)}
+figure{margin:0}figure img{width:100%;border-radius:8px;border:1px solid var(--line);background:#fff}figcaption{font-size:12px;color:var(--muted);margin-top:6px}
+.files{max-height:70vh;overflow:auto;font:12px ui-monospace,Consolas,monospace}.files div{padding:3px 6px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.files div:hover,.files div.on{background:var(--bg)}.files .dir{color:var(--muted);cursor:default;margin-top:6px;font-weight:700}
+pre{margin:0;max-height:70vh;overflow:auto;border-radius:8px;font-size:12px}pre code.hljs{padding:12px;border-radius:8px}
+.codegrid{display:grid;grid-template-columns:260px 1fr;gap:12px}@media(max-width:800px){.codegrid{grid-template-columns:1fr}}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}.muted{color:var(--muted)}.err{color:var(--err)}.ok{color:var(--ok)}
+.chart{position:relative;height:260px}
+.md{max-width:980px}.md table{margin:8px 0}.md code{background:var(--code);padding:1px 4px;border-radius:4px;font-size:12px}.md pre{background:var(--code);padding:10px}.md pre code{background:none}
+.md h1{font-size:22px}.md h2{font-size:18px;margin-top:20px}.btn.on{border-color:var(--accent);color:var(--accent)}
+.note{background:var(--infobg);border-radius:10px;padding:10px 12px;font-size:13px}
+[dir=auto]{unicode-bidi:plaintext}
+</style>
+</head>
+<body>
+<header><div class="bar">
+  <div class="brand">jubii<span>.7</span> · Invoice Reader</div>
+  <nav id="nav">
+    <button data-t="overview" class="on">Overview</button>
+    <button data-t="invoice">Invoice check</button>
+    <button data-t="classify">Line classifier</button>
+    <button data-t="model">Model evaluation</button>
+    <button data-t="quality">Testing &amp; quality</button>
+    <button data-t="docs">Docs &amp; findings</button>
+    <button data-t="code">Code</button>
+  </nav>
+</div></header>
+<main>
+
+<section id="overview" class="on">
+  <h2>Document AI pipeline: scanned invoice → checked, classified, routed</h2>
+  <p class="sub">Track A of the jubii.7 Live Challenge. Everything here is computed from this repo: live endpoints, plus reports written by <span class="mono">jubii7 train</span> and <span class="mono">scripts/quality.py</span>.</p>
+  <div class="pipe">
+    <div class="step"><b>1 · Scan</b><small>photo / PDF of a bilingual tax invoice</small></div><div class="arrow">→</div>
+    <div class="step"><b>2 · Extract</b><small>OCR + layout → JSON (here: AI-assisted, verified by hand)</small></div><div class="arrow">→</div>
+    <div class="step live"><b>3 · Profile</b><small>Arabic digits, gaps, fields to verify</small></div><div class="arrow">→</div>
+    <div class="step live"><b>4 · Check</b><small>12 business rules, recompute every total</small></div><div class="arrow">→</div>
+    <div class="step live"><b>5 · Classify lines</b><small>rules → ML model</small></div><div class="arrow">→</div>
+    <div class="step live"><b>6 · Route</b><small>auto-post, or human review</small></div>
+  </div>
+  <h3>Headline numbers</h3>
+  <div class="grid g4" id="kpis"></div>
+  <h3>Quality gates</h3>
+  <div class="grid g4" id="gates"></div>
+</section>
+
+<section id="invoice">
+  <h2>Invoice check</h2>
+  <p class="sub">Edit the extracted JSON and run the checker live (<span class="mono">POST /invoice/check</span>). Try fixing a number and watch the issues change.</p>
+  <div class="grid g2">
+    <div class="card">
+      <div class="row" style="margin-bottom:8px">
+        <button class="btn primary" id="runCheck">Run check</button>
+        <button class="btn" data-variant="original">Load challenge invoice</button>
+        <button class="btn" data-variant="corrected">Load corrected invoice</button>
+      </div>
+      <textarea id="invoiceJson" spellcheck="false"></textarea>
+    </div>
+    <div>
+      <div class="card" id="checkSummary"><span class="muted">Run the check to see results.</span></div>
+      <div class="card" style="margin-top:12px"><h3 style="margin-top:0">Printed vs recomputed totals</h3><div id="totals"></div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px"><h3 style="margin-top:0">Issues</h3><div id="issues"></div></div>
+  <div class="card" style="margin-top:12px"><h3 style="margin-top:0">Data profile</h3><div id="profile"></div></div>
+</section>
+
+<section id="classify">
+  <h2>Line classifier</h2>
+  <p class="sub">Cascade: deterministic bilingual rules first, then the ML model; anything unsure is flagged for a person (<span class="mono">POST /predict</span>).</p>
+  <div class="card">
+    <div class="row"><input id="lineText" dir="auto" placeholder="Type an invoice line in English or Arabic" style="flex:1"><button class="btn primary" id="runPredict">Classify</button></div>
+    <div class="chips" id="examples"></div>
+    <div id="prediction"></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="row"><h3 style="margin:0;flex:1">All lines on the challenge invoice</h3><button class="btn" id="runBatch">Classify invoice lines</button></div>
+    <div id="batch"></div>
+  </div>
+</section>
+
+<section id="model">
+  <h2>Model evaluation</h2>
+  <p class="sub">Selection by 5×5 repeated stratified k-fold CV (25 fits per model); a 30% stratified hold-out for per-class detail; an unseen challenge set for the honest number.</p>
+  <div class="grid g4" id="modelKpis"></div>
+  <h3>Candidates (each run logged to MLflow)</h3>
+  <div class="card" id="runs"></div>
+  <h3>Interactive curves</h3>
+  <div class="grid g2">
+    <div class="card"><b>Learning curve</b><div class="muted">macro-F1 vs training rows. A rising validation line means more labelled data will still help.</div><div class="chart"><canvas id="cLearn"></canvas></div></div>
+    <div class="card"><b>Learning-rate sweep (SGD)</b><div class="muted">macro-F1 vs eta0 (log scale): the stable range of learning rates.</div><div class="chart"><canvas id="cLr"></canvas></div></div>
+    <div class="card"><b>Training per epoch</b><div class="muted">validation macro-F1 per epoch for three learning rates.</div><div class="chart"><canvas id="cEpoch"></canvas></div></div>
+    <div class="card"><b>Regularisation (logistic regression C)</b><div class="muted">Too small C underfits, too large overfits (train ≫ validation).</div><div class="chart"><canvas id="cReg"></canvas></div></div>
+  </div>
+  <h3>Unseen challenge set: rules → model vs model alone</h3>
+  <div class="card" id="challenge"></div>
+  <h3>Mistakes under cross-validation</h3>
+  <div class="card" id="mistakes"></div>
+  <h3>All figures (PNG, from <span class="mono">reports/figures</span>)</h3>
+  <div class="grid g2" id="figures"></div>
+</section>
+
+<section id="quality">
+  <h2>Testing &amp; quality</h2>
+  <p class="sub">Results of <span class="mono">python scripts/quality.py</span>; the same gates run in GitHub Actions on every push.</p>
+  <div class="grid g4" id="qgates"></div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="card"><h3 style="margin-top:0">Tests</h3><div id="tests"></div></div>
+    <div class="card"><h3 style="margin-top:0">Coverage by file</h3><div id="coverage"></div></div>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="card"><h3 style="margin-top:0">Static analysis: ruff (lint) · mypy --strict (types)</h3><div id="lint"></div></div>
+    <div class="card"><h3 style="margin-top:0">Security: bandit (SAST) · pip-audit (dependency CVEs)</h3><div id="security"></div></div>
+  </div>
+  <div class="card" style="margin-top:12px"><h3 style="margin-top:0">Complexity (radon): cyclomatic complexity per function, maintainability per file</h3><div id="complexity"></div></div>
+</section>
+
+<section id="docs">
+  <h2>Docs &amp; findings</h2>
+  <p class="sub">The repo's documentation, including the findings log written during the build.</p>
+  <div class="row" id="docTabs" style="margin-bottom:12px"></div>
+  <div class="card md" id="docBody"></div>
+</section>
+
+<section id="code">
+  <h2>Code</h2>
+  <p class="sub">Read-only browser over the repo (whitelisted folders only).</p>
+  <div class="codegrid">
+    <div class="card files" id="fileList"></div>
+    <div class="card"><div class="mono muted" id="filePath" style="margin-bottom:8px"></div><pre><code id="fileBody"></code></pre></div>
+  </div>
+</section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pct = v => v == null ? "–" : (v * 100).toFixed(0) + "%";
+const f3 = v => v == null ? "–" : Number(v).toFixed(3);
+const money = v => Number(v).toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const badge = (t, cls) => `<span class="badge ${esc(cls || t)}">${esc(t)}</span>`;
+const api = async (url, opts) => { const r = await fetch(url, opts); if (!r.ok) throw new Error((await r.text()) || r.status); return r.json(); };
+const post = (url, body) => api(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+document.querySelectorAll("#nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#nav button, section").forEach(x => x.classList.remove("on"));
+  b.classList.add("on"); $("#" + b.dataset.t).classList.add("on"); history.replaceState(null, "", "#" + b.dataset.t);
+  try { localStorage.setItem("tab", b.dataset.t); } catch (e) {}
+});
+let startTab = location.hash.slice(1);
+try { startTab ||= localStorage.getItem("tab") || ""; } catch (e) {}
+if (startTab) document.querySelector(`#nav [data-t="${startTab}"]`)?.click();
+
+let D = {};
+async function boot() {
+  D = await api("/api/dashboard");
+  renderOverview(); renderModel(); renderQuality();
+  await loadInvoice("original"); runCheck();
+  loadFiles(); loadDocs();
+}
+
+// ---------- overview ----------
+function kpi(label, value, note) { return `<div class="card kpi"><div class="l">${esc(label)}</div><div class="v">${value}</div><div class="n">${esc(note || "")}</div></div>`; }
+function renderOverview() {
+  const card = D.model_card || {}, ch = card.challenge_set || {}, q = D.quality || {};
+  const tests = q.tests || [], passed = tests.filter(t => t.status === "passed").length;
+  const best = card.runs?.[card.model] || {};
+  $("#kpis").innerHTML = [
+    kpi("Invoice: correct total", "AED 23,504.04", "printed 23,606.30 → overcharged AED 102.26"),
+    kpi("Issues found", "10 errors", "3 warnings, 1 info"),
+    kpi("Model CV macro-F1", f3(best.cv_f1_macro_mean), `± ${f3(best.cv_f1_macro_std)} over 25 folds (${card.model || "–"})`),
+    kpi("Unseen set: rules → model", f3(ch.cascade_f1), `model alone ${f3(ch.model_f1)}`),
+    kpi("Lines auto-decided (unseen)", pct(ch.cascade_automation), `model alone ${pct(ch.model_automation)}`),
+    kpi("Accuracy when automatic", pct(ch.cascade_automated_accuracy), "the rest go to a person"),
+    kpi("Tests passing", tests.length ? `${passed}/${tests.length}` : "–", "unit, property-based, contract, API"),
+    kpi("Coverage", q.coverage ? q.coverage.total + "%" : "–", "line coverage of src/jubii7"),
+  ].join("");
+  $("#gates").innerHTML = gateCards();
+}
+function gateCards() {
+  const s = D.quality?.summary;
+  if (!s) return `<div class="card muted">Run <span class="mono">python scripts/quality.py</span> to populate.</div>`;
+  const label = {tests: "pytest + coverage", lint: "ruff lint", format: "ruff format", types: "mypy --strict", security: "bandit (SAST)", deps: "pip-audit (CVEs)", complexity: "radon CC", maintainability: "radon MI"};
+  return Object.entries(s).map(([k, v]) => `<div class="card kpi"><div class="l">${esc(label[k] || k)}</div><div class="v">${badge(v.passed ? "PASS" : "FAIL")}</div><div class="n">${v.seconds}s</div></div>`).join("");
+}
+
+// ---------- invoice ----------
+async function loadInvoice(variant) {
+  const data = await api("/api/sample-invoice?variant=" + variant);
+  $("#invoiceJson").value = JSON.stringify(data, null, 2);
+}
+document.querySelectorAll("[data-variant]").forEach(b => b.onclick = async () => { await loadInvoice(b.dataset.variant); runCheck(); });
+$("#runCheck").onclick = () => runCheck();
+async function runCheck() {
+  let body;
+  try { body = JSON.parse($("#invoiceJson").value); } catch (e) { $("#checkSummary").innerHTML = `<span class="err">Invalid JSON: ${esc(e.message)}</span>`; return; }
+  let r;
+  try { r = await post("/invoice/check", body); } catch (e) { $("#checkSummary").innerHTML = `<span class="err">${esc(e.message)}</span>`; return; }
+  $("#checkSummary").innerHTML = `<div class="row"><b style="font-size:18px">${esc(r.invoice_no)}</b>${badge(r.status.startsWith("OK") ? "OK" : "REJECT", r.status.startsWith("OK") ? "OK" : "ERROR")}</div>
+    <div class="row" style="margin-top:8px">${badge(r.summary.ERROR + " errors", "ERROR")} ${badge(r.summary.WARN + " warnings", "WARN")} ${badge(r.summary.INFO + " info", "INFO")}</div>
+    <p class="muted" style="margin:8px 0 0">${esc(r.status)}</p>`;
+  $("#issues").innerHTML = r.issues.length ? `<table><tr><th>Severity</th><th>Field</th><th>Problem</th><th>Rule</th></tr>${r.issues.map(i =>
+    `<tr><td>${badge(i.severity)}</td><td class="mono">${esc(i.field)}</td><td dir="auto">${esc(i.issue)}</td><td class="mono muted">${esc(i.check)}</td></tr>`).join("")}</table>` : `<span class="ok">No issues.</span>`;
+  const t = body.totals || {}, c = r.corrected_totals, num = s => Number(String(s).replace(/[(),]/g, "").replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)));
+  const rows = [["Total before discount", t.total_before_discount, c.total_before_discount], ["Discount", t.discount, -c.discount],
+    ["Taxable amount", t.taxable_amount, c.taxable_amount], ["VAT", t.vat, c.vat], ["Grand total", t.grand_total, c.grand_total]];
+  $("#totals").innerHTML = `<table><tr><th>Field</th><th class="num">Printed</th><th class="num">Recomputed</th><th class="num">Difference</th></tr>${rows.map(([n, p, k]) => {
+    const pv = String(p).includes("(") ? -num(p) : num(p), d = pv - k, bad = Math.abs(d) > 0.01;
+    return `<tr><td>${n}</td><td class="num">${esc(p)}</td><td class="num">${money(k)}</td><td class="num ${bad ? "err" : "ok"}">${bad ? money(d) : "✓"}</td></tr>`; }).join("")}</table>`;
+  const p = r.profile;
+  $("#profile").innerHTML = `<div class="grid g2"><div><b>Fields with Arabic digits</b><ul class="mono">${p.fields_with_arabic_digits.map(x => `<li dir="auto">${esc(x)}</li>`).join("") || "<li>none</li>"}</ul></div>
+    <div><b>Missing values</b><ul class="mono">${p.missing_values.map(x => `<li>${esc(x)}</li>`).join("") || "<li>none</li>"}</ul><b>Flagged to verify on the scan</b><ul class="mono">${p.flagged_for_verification.map(x => `<li>${esc(x)}</li>`).join("") || "<li>none</li>"}</ul></div></div>`;
+}
+
+// ---------- classifier ----------
+const EXAMPLES = ["حديد تسليح ١٦ مم", "Delivery of cement bags to site", "Waterproofing membrane", "Deformed bars Y20 TMT", "طوب أحمر ١٠٠٠ حبة", "Crusher run 0-40 mm", "شحن حديد إلى الموقع", "Hollow block 15 cm"];
+$("#examples").innerHTML = EXAMPLES.map(e => `<button class="chip" dir="auto">${esc(e)}</button>`).join("");
+document.querySelectorAll("#examples .chip").forEach(c => c.onclick = () => { $("#lineText").value = c.textContent; classify(); });
+$("#runPredict").onclick = classify; $("#lineText").onkeydown = e => { if (e.key === "Enter") classify(); };
+async function classify() {
+  const text = $("#lineText").value.trim(); if (!text) return;
+  let r; try { r = await post("/predict", {text}); } catch (e) { $("#prediction").innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
+  const byRule = r.source === "rules";
+  $("#prediction").innerHTML = `<div class="path">
+      <span class="node ${byRule ? "hit" : ""}">Rules ${byRule ? "✓ " + esc(r.reason) : "· no confident match"}</span><span class="muted">→</span>
+      <span class="node ${byRule ? "skip" : "hit"}">ML model ${byRule ? "(skipped)" : "· confidence " + f3(r.confidence)}</span><span class="muted">→</span>
+      <span class="node ${r.needs_review ? "hit" : "skip"}">Human review ${r.needs_review ? "· needed" : "(not needed)"}</span></div>
+    <div class="row"><b style="font-size:18px">${esc(r.category)}</b>${r.needs_review ? badge("needs review", "WARN") : badge("auto", "OK")}<span class="muted mono" dir="auto">normalised: ${esc(r.normalised)}</span></div>
+    ${r.top3.length ? `<table style="margin-top:8px">${r.top3.map(t => `<tr><td style="width:110px">${esc(t.category)}</td><td><div class="barwrap"><div class="barfill" style="width:${t.p * 100}%"></div></div></td><td class="num" style="width:60px">${f3(t.p)}</td></tr>`).join("")}</table>` : ""}`;
+}
+$("#runBatch").onclick = async () => {
+  const inv = JSON.parse($("#invoiceJson").value);
+  const lines = inv.groups.flatMap(g => g.lines).flatMap(l => [l.desc_en, l.desc_ar]);
+  const out = await post("/predict/batch", {lines: lines.map(text => ({text}))});
+  $("#batch").innerHTML = `<table><tr><th>Line</th><th>Category</th><th>Decided by</th><th class="num">Confidence</th><th>Route</th></tr>${out.map(r =>
+    `<tr><td dir="auto">${esc(r.text)}</td><td><b>${esc(r.category)}</b></td><td class="muted">${esc(r.source)} · ${esc(r.reason)}</td><td class="num">${f3(r.confidence)}</td><td>${r.needs_review ? badge("review", "WARN") : badge("auto", "OK")}</td></tr>`).join("")}</table>`;
+};
+
+// ---------- model ----------
+function line(id, labels, sets, logX, yTitle) {
+  const grid = css("--line"), ink = css("--muted");
+  new Chart($(id), {type: "line", data: {labels, datasets: sets}, options: {responsive: true, maintainAspectRatio: false, animation: false,
+    scales: {x: {type: logX ? "logarithmic" : "linear", ticks: {color: ink}, grid: {color: grid}}, y: {min: 0, max: 1.05, title: {display: true, text: yTitle, color: ink}, ticks: {color: ink}, grid: {color: grid}}},
+    plugins: {legend: {labels: {color: ink}}}, parsing: false}});
+}
+const pts = (xs, ys) => xs.map((x, i) => ({x, y: ys[i]}));
+function renderModel() {
+  const card = D.model_card, ev = D.evaluation;
+  if (!card || !ev) { $("#modelKpis").innerHTML = `<div class="card muted">Run <span class="mono">jubii7 train</span> first.</div>`; return; }
+  const best = card.runs[card.model], ch = card.challenge_set || {};
+  $("#modelKpis").innerHTML = [kpi("Chosen model", esc(card.model), card.selection), kpi("CV macro-F1", f3(best.cv_f1_macro_mean), "± " + f3(best.cv_f1_macro_std)),
+    kpi("Hold-out macro-F1", f3(card.holdout.f1_macro), "18 rows: indicative only"), kpi("Unseen set macro-F1", f3(ch.model_f1), `rules → model: ${f3(ch.cascade_f1)}`)].join("");
+  $("#runs").innerHTML = `<table><tr><th>Run</th><th class="num">CV macro-F1</th><th class="num">± std</th><th class="num">CV accuracy</th><th class="num">Hold-out F1</th><th class="num">Hold-out log loss</th><th>MLflow run</th></tr>${Object.entries(card.runs).map(([n, r]) =>
+    `<tr><td>${n === card.model ? "<b>" + esc(n) + "</b> ✓" : esc(n)}</td><td class="num">${f3(r.cv_f1_macro_mean)}</td><td class="num">${f3(r.cv_f1_macro_std)}</td><td class="num">${f3(r.cv_accuracy_mean)}</td><td class="num">${f3(r.test_f1_macro)}</td><td class="num">${f3(r.test_log_loss)}</td><td class="mono muted">${esc(String(r.run_id).slice(0, 8))}</td></tr>`).join("")}</table>`;
+  const c = ev.curves || {}, blue = css("--blue") || "#2563eb", orange = css("--accent") || "#ea580c";
+  const tv = (d, key, log) => [{label: "train", data: pts(d[key], d.train_mean), borderColor: blue, backgroundColor: blue}, {label: "validation (CV)", data: pts(d[key], d.valid_mean), borderColor: orange, backgroundColor: orange}];
+  if (c.learning_curve) line("#cLearn", null, tv(c.learning_curve, "train_rows"), false, "macro-F1");
+  if (c.learning_rate) line("#cLr", null, tv(c.learning_rate, "eta0"), true, "macro-F1");
+  if (c.regularisation) line("#cReg", null, tv(c.regularisation, "C"), true, "macro-F1");
+  if (c.epochs) { const cols = [blue, orange, "#16a34a"]; line("#cEpoch", null, Object.entries(c.epochs).map(([r, s], i) => ({label: "eta0=" + r, data: s.val_f1.map((y, j) => ({x: j + 1, y})), borderColor: cols[i], backgroundColor: cols[i], pointRadius: 0})), false, "validation macro-F1"); }
+  const rows = D.challenge_rows || [];
+  $("#challenge").innerHTML = `<div class="note">30 new lines with wording never seen in training or used to write the rules. The cascade lifts macro-F1 from ${f3(ch.model_f1)} to ${f3(ch.cascade_f1)} and automation from ${pct(ch.model_automation)} to ${pct(ch.cascade_automation)}, at ${pct(ch.cascade_automated_accuracy)} accuracy on the automatic decisions.</div>
+    <table style="margin-top:8px"><tr><th>Line</th><th>True</th><th>Rule</th><th>Model</th><th class="num">Model conf.</th><th>Final</th><th>Route</th><th></th></tr>${rows.map(r =>
+    `<tr><td dir="auto">${esc(r.text)}</td><td>${esc(r.label)}</td><td>${esc(r.rule) || "<span class='muted'>–</span>"}</td><td>${esc(r.model)}</td><td class="num">${esc(r.model_confidence)}</td><td><b>${esc(r.cascade)}</b></td><td>${r.automatic === "True" ? badge("auto", "OK") : badge("review", "WARN")}</td><td>${r.correct === "True" ? "<span class='ok'>✓</span>" : "<span class='err'>✗</span>"}</td></tr>`).join("")}</table>`;
+  const m = D.mistakes || [];
+  $("#mistakes").innerHTML = `<table><tr><th>Line</th><th>True</th><th>Predicted</th><th class="num">Confidence</th><th>Source</th></tr>${m.map(r => `<tr><td dir="auto">${esc(r.text)}</td><td>${esc(r.label)}</td><td class="err">${esc(r.predicted)}</td><td class="num">${esc(r.confidence)}</td><td class="muted">${esc(r.source)}</td></tr>`).join("")}</table>`;
+  const caps = {"01": "Model comparison: mean ± std macro-F1 over 25 CV folds.", "02": "Spread of macro-F1 across folds: small data means wide spread.", "03": "Per-class precision / recall / F1 on the hold-out split.",
+    "04": "Confusion matrix on the hold-out split.", "05": "Learning curve: validation still rising → more labels help most.", "06": "Regularisation curve for logistic regression (C).",
+    "07": "SGD learning-rate sweep.", "08": "Training loss and validation F1 per epoch at three learning rates.", "09": "Rules → model vs model on the unseen challenge set (honest).", "10": "Same comparison under CV on the training rows (optimistic for the rules)."};
+  $("#figures").innerHTML = (D.figures || []).map(f => `<figure class="card"><img src="/figures/${esc(f)}" alt="${esc(f)}" loading="lazy"><figcaption>${esc(caps[f.slice(0, 2)] || f)}</figcaption></figure>`).join("");
+}
+
+// ---------- quality ----------
+function renderQuality() {
+  const q = D.quality || {};
+  $("#qgates").innerHTML = gateCards();
+  const tests = q.tests || [], byFile = {};
+  tests.forEach(t => (byFile[t.file] ||= []).push(t));
+  $("#tests").innerHTML = tests.length ? Object.entries(byFile).map(([f, ts]) => `<details><summary><b class="mono">${esc(f)}</b> · ${ts.filter(t => t.status === "passed").length}/${ts.length} passed</summary>
+    <table>${ts.map(t => `<tr><td class="mono">${esc(t.name)}</td><td>${badge(t.status)}</td><td class="num muted">${t.seconds.toFixed(2)}s</td></tr>`).join("")}</table></details>`).join("") : "<span class='muted'>No junit report yet.</span>";
+  const cov = q.coverage;
+  $("#coverage").innerHTML = cov ? `<table>${Object.entries(cov.files).sort((a, b) => a[1] - b[1]).map(([f, v]) => `<tr><td class="mono">${esc(f.replace(/^src\/jubii7\//, ""))}</td><td style="width:40%"><div class="barwrap"><div class="barfill" style="width:${v}%;background:${v < 80 ? css("--warn") : css("--ok")}"></div></div></td><td class="num">${v}%</td></tr>`).join("")}</table>` : "–";
+  const lint = Array.isArray(q.lint) ? q.lint : [];
+  $("#lint").innerHTML = `<p>${lint.length ? badge(lint.length + " ruff findings", "WARN") : badge("ruff: 0 findings", "PASS")} ${/Success/.test(q.types || "") ? badge("mypy --strict: no type errors", "PASS") : badge("mypy: see output", "WARN")}</p>
+    ${lint.map(l => `<div class="mono">${esc(l.filename)}:${l.location?.row} <b>${esc(l.code)}</b> ${esc(l.message)}</div>`).join("")}<pre class="mono muted" style="white-space:pre-wrap">${esc(q.types || "")}</pre>`;
+  const bandit = q.security?.results || [], metrics = q.security?.metrics?._totals || {}, deps = q.deps?.dependencies || [], vulns = deps.flatMap(d => (d.vulns || []).map(v => ({...v, pkg: d.name, ver: d.version})));
+  $("#security").innerHTML = `<p>${bandit.length ? badge(bandit.length + " bandit findings", "WARN") : badge("bandit: 0 findings", "PASS")} <span class="muted">${metrics.loc ?? "–"} lines scanned; the 5 suppressions (# nosec) each carry a written reason in the code</span></p>
+    ${bandit.map(b => `<div class="mono">${esc(b.filename)}:${b.line_number} <b>${esc(b.test_id)}</b> ${esc(b.issue_text)}</div>`).join("")}
+    <p>${vulns.length ? badge(vulns.length + " known CVEs", "FAIL") : badge(`pip-audit: 0 known CVEs in ${deps.length} packages`, "PASS")}</p>
+    ${vulns.length ? `<table><tr><th>Package</th><th>Version</th><th>Advisory</th><th>Fixed in</th></tr>${vulns.map(v => `<tr><td>${esc(v.pkg)}</td><td>${esc(v.ver)}</td><td class="mono">${esc(v.id)}</td><td>${esc((v.fix_versions || []).join(", "))}</td></tr>`).join("")}</table>` : ""}`;
+  const cc = q.complexity || {}, mi = q.maintainability || {}, fns = [];
+  Object.entries(cc).forEach(([f, items]) => Array.isArray(items) && items.forEach(i => fns.push({f, ...i})));
+  fns.sort((a, b) => b.complexity - a.complexity);
+  $("#complexity").innerHTML = `<div class="grid g2"><div><b>Most complex functions</b> <span class="muted">(A = 1–5 simple, B = 6–10, C = 11–20)</span><table>${fns.slice(0, 12).map(x => `<tr><td class="mono">${esc(x.f.replace(/\\/g, "/").replace(/^src\/jubii7\//, ""))} · ${esc(x.name)}</td><td>${badge(x.rank, x.rank <= "A" ? "PASS" : x.rank <= "B" ? "INFO" : "WARN")}</td><td class="num">${x.complexity}</td></tr>`).join("")}</table></div>
+    <div><b>Maintainability index</b> <span class="muted">(A ≥ 20 is maintainable)</span><table>${Object.entries(mi).sort((a, b) => a[1].mi - b[1].mi).slice(0, 12).map(([f, v]) => `<tr><td class="mono">${esc(f.replace(/\\/g, "/").replace(/^src\/jubii7\//, ""))}</td><td>${badge(v.rank, v.rank === "A" ? "PASS" : "WARN")}</td><td class="num">${Number(v.mi).toFixed(0)}</td></tr>`).join("")}</table></div></div>`;
+}
+
+// ---------- code ----------
+async function loadFiles() {
+  const files = await api("/api/files"); let last = "";
+  $("#fileList").innerHTML = files.map(f => { const dir = f.includes("/") ? f.slice(0, f.lastIndexOf("/")) : "(root)", head = dir !== last ? `<div class="dir">${esc(dir)}/</div>` : ""; last = dir;
+    return head + `<div data-f="${esc(f)}">${esc(f.split("/").pop())}</div>`; }).join("");
+  document.querySelectorAll("#fileList [data-f]").forEach(d => d.onclick = () => openFile(d));
+  const first = document.querySelector('#fileList [data-f="src/jubii7/invoice/checks/base.py"]'); if (first) openFile(first);
+}
+async function openFile(el) {
+  document.querySelectorAll("#fileList .on").forEach(x => x.classList.remove("on")); el.classList.add("on");
+  const r = await api("/api/file?path=" + encodeURIComponent(el.dataset.f));
+  $("#filePath").textContent = r.path; const code = $("#fileBody"); code.textContent = r.content; code.removeAttribute("data-highlighted"); code.className = "";
+  if (window.hljs) hljs.highlightElement(code);
+}
+
+const DOCS = [["Findings", "docs/FINDINGS.md"], ["README", "README.md"], ["Testing methods", "docs/TESTING.md"], ["Model report", "docs/MODEL_REPORT.md"],
+  ["Architecture", "docs/ARCHITECTURE.md"], ["Track C", "docs/TRACK_C.md"], ["AI prompts", "docs/PROMPTS.md"]];
+function loadDocs() {
+  $("#docTabs").innerHTML = DOCS.map(([n, p], i) => `<button class="btn${i ? "" : " on"}" data-doc="${p}">${n}</button>`).join("");
+  document.querySelectorAll("[data-doc]").forEach(b => b.onclick = () => { document.querySelectorAll("[data-doc]").forEach(x => x.classList.remove("on")); b.classList.add("on"); showDoc(b.dataset.doc); });
+  showDoc(DOCS[0][1]);
+}
+async function showDoc(path) {
+  const r = await api("/api/file?path=" + encodeURIComponent(path));
+  $("#docBody").innerHTML = window.marked ? marked.parse(r.content) : `<pre>${esc(r.content)}</pre>`;
+}
+
+boot().catch(e => document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="card err">Could not load the dashboard: ${esc(e.message)}</div>`));
+</script>
+</body>
+</html>

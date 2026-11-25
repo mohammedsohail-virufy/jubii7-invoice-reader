@@ -1,0 +1,42 @@
+{
+  "tests": {
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 20.2
+  },
+  "lint": {
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.7
+  },
+  "format": {
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.0
+  },
+  "types": {
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 3.5
+  },
+  "security": {
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 1.1
+  },
+  "deps": {
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 3.7
+  },
+  "complexity": {
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.4
+  },
+  "maintainability": {
+    "passed": true,
+    "exit_code": 0,
+    "seconds": 0.4
+  }
+}
