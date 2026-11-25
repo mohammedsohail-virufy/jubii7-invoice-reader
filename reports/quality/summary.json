@@ -2,32 +2,32 @@
   "tests": {
     "passed": true,
     "exit_code": 0,
-    "seconds": 19.7
+    "seconds": 26.2
   },
   "lint": {
     "passed": true,
     "exit_code": 0,
-    "seconds": 0.1
+    "seconds": 0.0
   },
   "format": {
     "passed": true,
     "exit_code": 0,
-    "seconds": 0.1
+    "seconds": 0.0
   },
   "types": {
     "passed": true,
     "exit_code": 0,
-    "seconds": 2.5
+    "seconds": 2.9
   },
   "security": {
     "passed": true,
     "exit_code": 0,
-    "seconds": 0.8
+    "seconds": 0.9
   },
   "deps": {
     "passed": true,
     "exit_code": 0,
-    "seconds": 26.1
+    "seconds": 31.5
   },
   "complexity": {
     "passed": true,

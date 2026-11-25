@@ -4,209 +4,322 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>jubii.7 Invoice Reader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" media="(prefers-color-scheme: light)">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <style>
-:root{--bg:#f7f7f8;--panel:#fff;--ink:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#ea580c;--blue:#2563eb;
---err:#dc2626;--errbg:#fef2f2;--warn:#b45309;--warnbg:#fffbeb;--info:#2563eb;--infobg:#eff6ff;--ok:#15803d;--okbg:#f0fdf4;--code:#f3f4f6}
-@media (prefers-color-scheme:dark){:root{--bg:#0b0d12;--panel:#151821;--ink:#e5e7eb;--muted:#9ca3af;--line:#262a36;
---errbg:#2a1215;--warnbg:#2a2010;--infobg:#111c33;--okbg:#0f2318;--code:#0f1117}}
-*{box-sizing:border-box}body{margin:0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
-header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
-.bar{max-width:1280px;margin:auto;padding:12px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-.brand{font-weight:700;font-size:16px}.brand span{color:var(--accent)}
-nav{display:flex;gap:4px;flex-wrap:wrap}nav button{border:0;background:none;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font:inherit}
-nav button.on{background:var(--bg);color:var(--ink);font-weight:600}
-main{max-width:1280px;margin:auto;padding:20px 16px 60px}section{display:none}section.on{display:block}
-h2{font-size:20px;margin:0 0 4px}h3{font-size:15px;margin:20px 0 8px}.sub{color:var(--muted);margin:0 0 16px}
-.grid{display:grid;gap:12px}.g4{grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr))}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
-.kpi .v{font-size:26px;font-weight:700}.kpi .l{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}.kpi .n{color:var(--muted);font-size:12px}
-table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--muted);font-weight:600;font-size:12px}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-.badge{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700}
+/* ---------- design tokens: Rahat Global palette (rahatglobal.com) ---------- */
+:root{
+  --bg:#070B14;--panel:#0D1424;--raised:#16203A;--ink:#F2F4F8;--ink2:#C9D2E3;--muted:#97A3BC;--line:rgba(160,180,220,.14);
+  --accent:#3D7BFF;--accent-2:#2459E0;--accent-ink:#ffffff;--accent-soft:rgba(61,123,255,.14);--ice:#9CC4FF;
+  --uae-green:#00843D;--uae-red:#E8202A;--blue:#3D7BFF;--orange:#E8A33D;
+  --err:#FF6B72;--errbg:rgba(232,32,42,.16);--warn:#F2B65A;--warnbg:rgba(242,182,90,.14);--info:#9CC4FF;--infobg:rgba(61,123,255,.16);
+  --ok:#3DDC84;--okbg:rgba(0,132,61,.22);
+  --radius:4px;--radius-s:3px;--shadow:none;
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --grid:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+}
+@media (prefers-color-scheme:light){:root{
+  --bg:#F2F4F8;--panel:#FFFFFF;--raised:#F2F4F8;--ink:#0E1525;--ink2:#2A3448;--muted:#5A6478;--line:#DDE2EB;
+  --accent:#2459E0;--accent-2:#1B47B8;--accent-soft:rgba(36,89,224,.10);--ice:#2459E0;
+  --err:#C8151E;--errbg:#FDE3E4;--warn:#9A5B00;--warnbg:#FDF0DC;--info:#1B47B8;--infobg:#E3ECFF;--ok:#00733A;--okbg:#DDF3E6;
+  --shadow:0 1px 2px rgba(14,21,37,.05)}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:15px/1.6 var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+
+/* ---------- header + tabs ---------- */
+header{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header::before{content:"";display:block;height:3px;background:linear-gradient(90deg,var(--uae-green) 0 25%,var(--ink) 25% 50%,var(--uae-red) 50% 75%,var(--accent) 75%)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0 10px}
+.brand{font-weight:700;font-size:22px;letter-spacing:-.02em}.brand .dot{color:var(--accent)}.brand small{font-weight:500;color:var(--muted);font-size:14px;margin-left:8px}
+.tabs{display:flex;justify-content:center;padding-bottom:12px}
+nav{display:inline-flex;gap:4px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{border:0;border-bottom:2px solid transparent;background:none;color:var(--muted);padding:8px 14px 10px;cursor:pointer;font:500 15px var(--font);white-space:nowrap}
+nav button:hover{color:var(--ink)}nav button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}nav button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
+.tabs{padding-bottom:0}
+
+/* ---------- page sections ---------- */
+main{padding:8px 0 80px}section{display:none;animation:fade .2s ease}section.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.page-head{text-align:center;max-width:860px;margin:0 auto 36px;padding:64px 20px 8px;position:relative}.page-head::before{content:"";position:absolute;inset:0 -40vw;z-index:-1;background-image:var(--grid);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse 60% 80% at 50% 30%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 60% 80% at 50% 30%,#000 30%,transparent 75%)}
+.eyebrow{display:inline-block;font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ice);margin-bottom:16px;padding:5px 10px;border:1px solid var(--line);background:var(--panel)}
+h1{font-size:clamp(36px,6vw,64px);line-height:1.04;letter-spacing:-.035em;margin:0 0 18px;font-weight:700}
+.lead{font-size:18px;line-height:1.6;color:var(--ink2);margin:0 auto;max-width:680px}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+h3{font-size:15px;font-weight:700;margin:22px 0 10px}
+
+/* ---------- panels ---------- */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:0 0 18px;min-width:0}
+.panel-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)}
+.panel-h h2{font:600 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;margin:0;color:var(--ink)}.panel-h p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.panel-b{padding:16px 18px;overflow-x:auto}
+.cols{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr))}.cols>.panel{margin:0}
+.stack{display:flex;flex-direction:column;gap:18px}.stack>.panel{margin:0}
+
+/* ---------- stats strip (one bar, never orphan boxes) ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin:0 auto 18px;overflow:hidden}
+.stat{padding:22px 18px;text-align:center;border-left:1px solid var(--line)}.stat:first-child{border-left:0}
+.stat{padding:28px 18px}.stat .v{font-size:38px;font-weight:600;letter-spacing:-.03em;line-height:1.1}.stat .v.accent{color:var(--accent)}
+.stat .l{font:500 11.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-top:8px;color:var(--ink2)}.stat .n{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ---------- pipeline stepper ---------- */
+.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:0;position:relative;margin:6px 0}
+.steps::before{content:"";position:absolute;top:19px;left:8%;right:8%;height:2px;background:var(--line)}
+.step{text-align:center;position:relative;padding:6px;cursor:pointer;border-radius:var(--radius)}.step:hover b{color:var(--accent)}.step:hover .num{border-color:var(--accent)}.step:focus-visible{outline:2px solid var(--accent)}
+.step .num{width:40px;height:40px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;font-weight:700;background:var(--raised);border:2px solid var(--line);color:var(--muted);position:relative}
+.step.live .num{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.step b{display:block;font-size:14px}.step small{display:block;color:var(--muted);font-size:12px;line-height:1.4;margin-top:2px}
+
+/* ---------- gates ---------- */
+.gates{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.gate{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:var(--radius-s);font-family:var(--mono)!important;background:var(--panel);border:1px solid var(--line);font-size:13px;font-weight:500}
+.gate i{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block}.gate.fail i{background:var(--err)}.gate span{color:var(--muted)}
+
+/* ---------- controls ---------- */
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:11px 18px;border-radius:var(--radius-s);cursor:pointer;font:500 14px var(--font);text-decoration:none;transition:border-color .15s,background .15s}.btn:disabled{opacity:.45;cursor:not-allowed}.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn:hover{border-color:var(--muted);text-decoration:none}.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}.btn.primary:hover{background:var(--accent-2);border-color:var(--accent-2)}
+.btn.small{padding:6px 12px;font-size:13px}.btn.on{border-color:var(--accent);color:var(--accent)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+textarea,input[type=text]{width:100%;font:13px/1.5 var(--mono);background:var(--raised);color:var(--ink);border:1px solid var(--line);border-radius:var(--radius-s);padding:12px}
+textarea{height:420px;resize:vertical}textarea:focus,input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 4px}
+.chip{border:1px solid var(--line);background:var(--raised);color:var(--ink);border-radius:var(--radius-s);padding:5px 12px;cursor:pointer;font:13px var(--font)}.chip:hover{border-color:var(--accent)}
+
+/* ---------- data display ---------- */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+tr:last-child td{border-bottom:0}td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;padding:2px 8px;border-radius:2px;font:600 11px var(--mono);letter-spacing:.04em;white-space:nowrap;text-transform:uppercase}
 .ERROR,.failed,.FAIL{background:var(--errbg);color:var(--err)}.WARN{background:var(--warnbg);color:var(--warn)}
-.INFO{background:var(--infobg);color:var(--info)}.passed,.PASS,.OK{background:var(--okbg);color:var(--ok)}.skipped{background:var(--code);color:var(--muted)}
-textarea,input{width:100%;font:13px ui-monospace,Consolas,monospace;background:var(--code);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px}
-textarea{height:420px;resize:vertical}
-.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;font:inherit}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.chip{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer;font-size:12px}
-.pipe{display:flex;gap:6px;align-items:stretch;flex-wrap:wrap}.step{flex:1;min-width:120px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
-.step b{display:block;font-size:13px}.step small{color:var(--muted)}.arrow{align-self:center;color:var(--muted)}
-.step.live{border-color:var(--accent)}
-.path{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}.node{padding:6px 10px;border-radius:8px;border:1px solid var(--line);font-size:12px}
-.node.hit{border-color:var(--accent);background:var(--warnbg)}.node.skip{opacity:.45}
-.barwrap{background:var(--code);border-radius:6px;height:16px;overflow:hidden}.barfill{height:100%;background:var(--blue)}
-figure{margin:0}figure img{width:100%;border-radius:8px;border:1px solid var(--line);background:#fff}figcaption{font-size:12px;color:var(--muted);margin-top:6px}
-.files{max-height:70vh;overflow:auto;font:12px ui-monospace,Consolas,monospace}.files div{padding:3px 6px;border-radius:6px;cursor:pointer;white-space:nowrap}
-.files div:hover,.files div.on{background:var(--bg)}.files .dir{color:var(--muted);cursor:default;margin-top:6px;font-weight:700}
-pre{margin:0;max-height:70vh;overflow:auto;border-radius:8px;font-size:12px}pre code.hljs{padding:12px;border-radius:8px}
-.codegrid{display:grid;grid-template-columns:260px 1fr;gap:12px}@media(max-width:800px){.codegrid{grid-template-columns:1fr}}
-.mono{font-family:ui-monospace,Consolas,monospace;font-size:12px}.muted{color:var(--muted)}.err{color:var(--err)}.ok{color:var(--ok)}
-.chart{position:relative;height:260px}
-.md{max-width:980px}.md table{margin:8px 0}.md code{background:var(--code);padding:1px 4px;border-radius:4px;font-size:12px}.md pre{background:var(--code);padding:10px}.md pre code{background:none}
-.md h1{font-size:22px}.md h2{font-size:18px;margin-top:20px}.btn.on{border-color:var(--accent);color:var(--accent)}
-.note{background:var(--infobg);border-radius:10px;padding:10px 12px;font-size:13px}
+.INFO{background:var(--infobg);color:var(--info)}.passed,.PASS,.OK{background:var(--okbg);color:var(--ok)}.skipped{background:var(--raised);color:var(--muted)}
+.mono{font-family:var(--mono);font-size:12.5px}.muted{color:var(--muted)}.err{color:var(--err)}.ok{color:var(--ok)}
+.note{background:var(--accent-soft);border-radius:var(--radius-s);padding:12px 14px;font-size:14px;margin-bottom:12px}
+.path{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0}.node{padding:7px 12px;border-radius:var(--radius-s);border:1px solid var(--line);font-size:13px}
+.node.hit{border-color:var(--accent);background:var(--accent-soft)}.node.skip{opacity:.45}
+.barwrap{background:var(--raised);border-radius:99px;height:10px;overflow:hidden}.barfill{height:100%;background:var(--accent);border-radius:99px}
+.progress{height:8px;background:var(--raised);border-radius:99px;overflow:hidden;margin-top:8px}.progress div{height:100%;background:var(--accent);transition:width .2s}
+.big{font-size:22px;font-weight:800;letter-spacing:-.01em}
+.chart{position:relative;height:250px;margin-top:8px}
+.figs{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr))}
+figure{margin:0}figure img{width:100%;border-radius:var(--radius-s);background:#fff;display:block}figcaption{font-size:13px;color:var(--muted);margin-top:8px}
+details{border-bottom:1px solid var(--line);padding:8px 0}details:last-child{border-bottom:0}summary{cursor:pointer}
+.files{max-height:70vh;overflow:auto;font:12.5px var(--mono)}.files div{padding:4px 8px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.files div:hover,.files div.on{background:var(--raised)}.files .dir{color:var(--muted);cursor:default;margin-top:8px;font-weight:600}
+pre{margin:0;max-height:72vh;overflow:auto;border-radius:var(--radius-s);font-size:12.5px}pre code.hljs{padding:14px;border-radius:var(--radius-s);font-family:var(--mono)}
+.codegrid{display:grid;grid-template-columns:270px 1fr;gap:18px}
+.md{max-width:860px;margin:0 auto}.md table{margin:10px 0;font-size:13px}.md code{background:var(--raised);padding:1px 5px;border-radius:5px;font:12.5px var(--mono)}
+.md pre{background:var(--raised);padding:12px}.md pre code{background:none}.md h1{font-size:26px;text-align:left}.md h2{font-size:19px;margin-top:26px}
+.doc-tabs{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+#scanCanvas{width:100%;border-radius:var(--radius-s);border:1px solid var(--line);display:none;margin-top:12px}
 [dir=auto]{unicode-bidi:plaintext}
-.card{overflow-x:auto;min-width:0}nav{overflow-x:auto;scrollbar-width:none;max-width:100%}nav button{white-space:nowrap}
-.progress{height:8px;background:var(--code);border-radius:99px;overflow:hidden;margin-top:6px}.progress div{height:100%;background:var(--accent);transition:width .2s}
-@media (max-width:640px){
-  .bar{padding:10px 12px;gap:8px}nav{flex-wrap:nowrap;width:100%}main{padding:14px 12px 48px}
-  h2{font-size:18px}.kpi .v{font-size:21px}textarea{height:240px}
-  textarea,input{font-size:16px}.btn{padding:10px 14px}
-  .pipe{flex-direction:column}.arrow{transform:rotate(90deg);align-self:center}
-  th,td{padding:6px 5px}
+.foot{text-align:center;color:var(--muted);font-size:13px;margin-top:40px}
+
+/* ---------- phones ---------- */
+@media (max-width:760px){
+  .wrap{padding:0 14px}.brand small{display:none}.tabs{justify-content:flex-start}
+  .page-head{margin:26px auto 22px}.lead{font-size:15px}
+  .stats{grid-template-columns:repeat(2,1fr)}.stat:nth-child(3){border-left:0}.stat:nth-child(n+3){border-top:1px solid var(--line)}
+  .stat .v{font-size:24px}
+  .steps{grid-template-columns:1fr;gap:14px}.steps::before{display:none}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:12px;text-align:left;align-items:center}.step .num{margin:0}
+  textarea{height:260px}textarea,input[type=text]{font-size:16px}
+  .codegrid{grid-template-columns:1fr}th,td{padding:8px 6px}
 }
 </style>
 </head>
 <body>
-<header><div class="bar">
-  <div class="brand">jubii<span>.7</span> · Invoice Reader</div>
-  <span id="pyStatus" class="badge OK" style="display:none"></span>
-  <nav id="nav">
-    <button data-t="overview" class="on">Overview</button>
-    <button data-t="scan">Scan document</button>
-    <button data-t="invoice">Invoice check</button>
-    <button data-t="classify">Line classifier</button>
-    <button data-t="model">Model evaluation</button>
-    <button data-t="quality">Testing &amp; quality</button>
-    <button data-t="docs">Docs &amp; findings</button>
-    <button data-t="code">Code</button>
-  </nav>
-</div></header>
-<main>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div class="brand">jubii<span class="dot">.7</span><small>Invoice Reader</small></div>
+      <span id="pyStatus" class="badge INFO" style="display:none"></span>
+      <a class="btn small" href="https://github.com/mohammedsohail-virufy/jubii7-invoice-reader" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <div class="tabs"><nav id="nav">
+      <button data-t="overview" class="on">Overview</button>
+      <button data-t="scan">Scan</button>
+      <button data-t="invoice">Check invoice</button>
+      <button data-t="classify">Classify lines</button>
+      <button data-t="model">Model</button>
+      <button data-t="quality">Quality</button>
+      <button data-t="docs">Docs</button>
+      <button data-t="code">Code</button>
+    </nav></div>
+  </div>
+</header>
+
+<main class="wrap">
 
 <section id="overview" class="on">
-  <h2>Document AI pipeline: scanned invoice → checked, classified, routed</h2>
-  <p class="sub">Track A of the jubii.7 Live Challenge. Everything here is computed from this repo: live endpoints, plus reports written by <span class="mono">jubii7 train</span> and <span class="mono">scripts/quality.py</span>.</p>
-  <div class="pipe">
-    <div class="step"><b>1 · Scan</b><small>photo / PDF of a bilingual tax invoice</small></div><div class="arrow">→</div>
-    <div class="step"><b>2 · Extract</b><small>OCR + layout → JSON (here: AI-assisted, verified by hand)</small></div><div class="arrow">→</div>
-    <div class="step live"><b>3 · Profile</b><small>Arabic digits, gaps, fields to verify</small></div><div class="arrow">→</div>
-    <div class="step live"><b>4 · Check</b><small>12 business rules, recompute every total</small></div><div class="arrow">→</div>
-    <div class="step live"><b>5 · Classify lines</b><small>rules → ML model</small></div><div class="arrow">→</div>
-    <div class="step live"><b>6 · Route</b><small>auto-post, or human review</small></div>
+  <div class="page-head">
+    <span class="eyebrow">jubii.7 Live Challenge · Track A</span>
+    <h1>Read the messy invoice</h1>
+    <p class="lead" id="overviewLead">A bilingual Arabic / English tax invoice, scanned, checked against 12 business rules and classified line by line. Anything uncertain goes to a person.</p>
+    <div class="actions">
+      <button class="btn primary" data-go="scan">Scan a document</button>
+      <button class="btn" data-go="invoice">See the invoice check</button>
+      <button class="btn" data-go="model">Model evaluation</button>
+    </div>
   </div>
-  <h3>Headline numbers</h3>
-  <div class="grid g4" id="kpis"></div>
-  <h3>Quality gates</h3>
-  <div class="grid g4" id="gates"></div>
+  <div class="stats" id="kpis"></div>
+  <div class="panel">
+    <div class="panel-h"><div><h2>How it works</h2><p>Click a step to open it. Highlighted steps run in this app.</p></div></div>
+    <div class="panel-b">
+      <div class="steps">
+        <div class="step live" role="link" tabindex="0" data-go="scan"><div class="num">1</div><div><b>Scan</b><small>camera, image or PDF</small></div></div>
+        <div class="step" role="link" tabindex="0" data-go="scan"><div class="num">2</div><div><b>Extract</b><small>OCR + layout to JSON</small></div></div>
+        <div class="step live" role="link" tabindex="0" data-go="invoice"><div class="num">3</div><div><b>Profile</b><small>Arabic digits, gaps</small></div></div>
+        <div class="step live" role="link" tabindex="0" data-go="invoice"><div class="num">4</div><div><b>Check</b><small>12 rules, every total</small></div></div>
+        <div class="step live" role="link" tabindex="0" data-go="classify"><div class="num">5</div><div><b>Classify</b><small>rules, then ML model</small></div></div>
+        <div class="step live" role="link" tabindex="0" data-go="classify"><div class="num">6</div><div><b>Route</b><small>auto-post or review</small></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-h"><div><h2>Quality gates</h2><p>The same checks run in GitHub Actions on every push.</p></div></div>
+    <div class="panel-b"><div class="gates" id="gates"></div></div>
+  </div>
 </section>
 
 <section id="scan">
-  <h2>Scan document</h2>
-  <p class="sub">Photograph an invoice or upload an image / PDF. Text recognition (Tesseract.js, Arabic + English) runs <b>on your device</b>: the document is never uploaded. The text is then analysed by the package's Python code: line items, quantity × price = amount, dates, TRNs, VAT and line categories.</p>
-  <div class="grid g2">
-    <div class="card">
-      <div class="row">
-        <label class="btn primary" for="scanCamera">Scan with camera</label>
-        <input id="scanCamera" type="file" accept="image/*" capture="environment" hidden>
-        <label class="btn" for="scanUpload">Upload image or PDF</label>
-        <input id="scanUpload" type="file" accept="image/*,application/pdf" hidden>
-        <button class="btn" id="scanSample">Try the sample scan</button>
-      </div>
-      <div id="ocrProgress" class="muted" style="margin:10px 0"></div>
-      <canvas id="scanCanvas" style="width:100%;border-radius:8px;border:1px solid var(--line);display:none"></canvas>
-    </div>
-    <div class="card">
-      <div class="row" style="margin-bottom:8px"><b style="flex:1">Recognised text <span class="muted">(fix misreads, then analyse)</span></b><button class="btn primary" id="scanAnalyse">Analyse text</button></div>
-      <textarea id="ocrText" dir="auto" spellcheck="false" placeholder="The recognised text appears here. You can also paste text."></textarea>
+  <div class="page-head">
+    <span class="eyebrow">Scan document</span>
+    <h1>Photograph or upload an invoice</h1>
+    <p class="lead">Text recognition (Arabic + English) runs on your device, so the document is never uploaded. The text is then checked: line maths, dates, TRNs, VAT and line categories.</p>
+    <div class="actions">
+      <label class="btn primary" for="scanCamera">Scan with camera</label>
+      <input id="scanCamera" type="file" accept="image/*" capture="environment" hidden>
+      <label class="btn" for="scanUpload">Upload image or PDF</label>
+      <input id="scanUpload" type="file" accept="image/*,application/pdf" hidden>
+      <button class="btn" id="scanSample">Try the original challenge photo</button>
     </div>
   </div>
-  <div class="card" style="margin-top:12px" id="scanResult"><span class="muted">Results appear here.</span></div>
-  <p class="muted" style="font-size:12px">Text-level checks only. Mapping every field into the structured invoice needs layout and table detection (production design in docs/ARCHITECTURE.md); the full 12-rule checker then runs on the result, as in the Invoice check tab.</p>
+  <div class="cols">
+    <div class="panel">
+      <div class="panel-h"><div><h2>Document</h2><p>Cleaned for OCR: greyscale, contrast, upscaled.</p></div></div>
+      <div class="panel-b"><div id="ocrProgress" class="muted">Choose a document to start.</div><canvas id="scanCanvas"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-h"><div><h2>Recognised text</h2><p>Fix misreads, then analyse.</p></div><button class="btn primary small" id="scanAnalyse">Analyse text</button></div>
+      <div class="panel-b"><textarea id="ocrText" dir="auto" spellcheck="false" placeholder="The recognised text appears here. You can also paste text."></textarea></div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:18px">
+    <div class="panel-h"><div><h2>Results</h2><p>Text-level checks. The full 12-rule check needs the structured invoice (layout and table detection: see the architecture doc).</p></div></div>
+    <div class="panel-b" id="scanResult"><span class="muted">Results appear here.</span></div>
+  </div>
 </section>
 
 <section id="invoice">
-  <h2>Invoice check</h2>
-  <p class="sub">Edit the extracted JSON and run the checker live (<span class="mono">POST /invoice/check</span>). Try fixing a number and watch the issues change.</p>
-  <div class="grid g2">
-    <div class="card">
-      <div class="row" style="margin-bottom:8px">
-        <button class="btn primary" id="runCheck">Run check</button>
-        <button class="btn" data-variant="original">Load challenge invoice</button>
-        <button class="btn" data-variant="corrected">Load corrected invoice</button>
-      </div>
-      <textarea id="invoiceJson" spellcheck="false"></textarea>
+  <div class="page-head">
+    <span class="eyebrow">Check invoice</span>
+    <h1>12 rules, every total recomputed</h1>
+    <p class="lead">Edit the extracted invoice and run the checker live. Fix a number and watch the issues change.</p>
+  </div>
+  <div class="cols">
+    <div class="panel">
+      <div class="panel-h"><div><h2>Extracted invoice</h2><p>JSON, values exactly as printed</p></div>
+        <div class="row"><button class="btn small" data-variant="original">Challenge</button><button class="btn small" data-variant="corrected">Corrected</button><button class="btn primary small" id="runCheck">Run check</button></div></div>
+      <div class="panel-b"><textarea id="invoiceJson" spellcheck="false"></textarea></div>
     </div>
-    <div>
-      <div class="card" id="checkSummary"><span class="muted">Run the check to see results.</span></div>
-      <div class="card" style="margin-top:12px"><h3 style="margin-top:0">Printed vs recomputed totals</h3><div id="totals"></div></div>
+    <div class="stack">
+      <div class="panel"><div class="panel-h"><h2>Result</h2></div><div class="panel-b" id="checkSummary"><span class="muted">Run the check to see results.</span></div></div>
+      <div class="panel"><div class="panel-h"><h2>Printed vs recomputed</h2></div><div class="panel-b" id="totals"></div></div>
     </div>
   </div>
-  <div class="card" style="margin-top:12px"><h3 style="margin-top:0">Issues</h3><div id="issues"></div></div>
-  <div class="card" style="margin-top:12px"><h3 style="margin-top:0">Data profile</h3><div id="profile"></div></div>
+  <div class="panel" style="margin-top:18px"><div class="panel-h"><h2>Issues</h2></div><div class="panel-b" id="issues"></div></div>
+  <div class="panel"><div class="panel-h"><div><h2>Data profile</h2><p>What a data engineer needs to know before parsing</p></div></div><div class="panel-b" id="profile"></div></div>
 </section>
 
 <section id="classify">
-  <h2>Line classifier</h2>
-  <p class="sub">Cascade: deterministic bilingual rules first, then the ML model; anything unsure is flagged for a person (<span class="mono">POST /predict</span>).</p>
-  <div class="card">
-    <div class="row"><input id="lineText" dir="auto" placeholder="Type an invoice line in English or Arabic" style="flex:1"><button class="btn primary" id="runPredict">Classify</button></div>
-    <div class="chips" id="examples"></div>
-    <div id="prediction"></div>
+  <div class="page-head">
+    <span class="eyebrow">Classify lines</span>
+    <h1>Rules first, then the model, then a person</h1>
+    <p class="lead">Each invoice line is mapped to cement, steel, aggregates, blocks or services, in English or Arabic, with the reason shown.</p>
   </div>
-  <div class="card" style="margin-top:12px">
-    <div class="row"><h3 style="margin:0;flex:1">All lines on the challenge invoice</h3><button class="btn" id="runBatch">Classify invoice lines</button></div>
-    <div id="batch"></div>
+  <div class="panel">
+    <div class="panel-h"><h2>Try a line</h2></div>
+    <div class="panel-b">
+      <div class="row"><input type="text" id="lineText" dir="auto" placeholder="Type an invoice line in English or Arabic" style="flex:1"><button class="btn primary" id="runPredict">Classify</button></div>
+      <div class="chips" id="examples"></div>
+      <div id="prediction"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-h"><h2>Every line on the challenge invoice</h2><button class="btn small" id="runBatch">Classify all</button></div>
+    <div class="panel-b" id="batch"><span class="muted">Press "Classify all".</span></div>
   </div>
 </section>
 
 <section id="model">
-  <h2>Model evaluation</h2>
-  <p class="sub">Selection by 5×5 repeated stratified k-fold CV (25 fits per model); a 30% stratified hold-out for per-class detail; an unseen challenge set for the honest number.</p>
-  <div class="grid g4" id="modelKpis"></div>
-  <h3>Candidates (each run logged to MLflow)</h3>
-  <div class="card" id="runs"></div>
-  <h3>Interactive curves</h3>
-  <div class="grid g2">
-    <div class="card"><b>Learning curve</b><div class="muted">macro-F1 vs training rows. A rising validation line means more labelled data will still help.</div><div class="chart"><canvas id="cLearn"></canvas></div></div>
-    <div class="card"><b>Learning-rate sweep (SGD)</b><div class="muted">macro-F1 vs eta0 (log scale): the stable range of learning rates.</div><div class="chart"><canvas id="cLr"></canvas></div></div>
-    <div class="card"><b>Training per epoch</b><div class="muted">validation macro-F1 per epoch for three learning rates.</div><div class="chart"><canvas id="cEpoch"></canvas></div></div>
-    <div class="card"><b>Regularisation (logistic regression C)</b><div class="muted">Too small C underfits, too large overfits (train ≫ validation).</div><div class="chart"><canvas id="cReg"></canvas></div></div>
+  <div class="page-head">
+    <span class="eyebrow">Model evaluation</span>
+    <h1>Validated three ways</h1>
+    <p class="lead">5 × 5 repeated stratified k-fold to choose, a hold-out split for per-class detail, and an unseen challenge set for the honest number.</p>
   </div>
-  <h3>Unseen challenge set: rules → model vs model alone</h3>
-  <div class="card" id="challenge"></div>
-  <h3>Mistakes under cross-validation</h3>
-  <div class="card" id="mistakes"></div>
-  <h3>All figures (PNG, from <span class="mono">reports/figures</span>)</h3>
-  <div class="grid g2" id="figures"></div>
+  <div class="stats" id="modelKpis"></div>
+  <div class="panel"><div class="panel-h"><div><h2>Candidates</h2><p>Each run logged to MLflow</p></div></div><div class="panel-b" id="runs"></div></div>
+  <div class="cols">
+    <div class="panel"><div class="panel-h"><div><h2>Learning curve</h2><p>Validation still rising: more labelled data helps most</p></div></div><div class="panel-b"><div class="chart"><canvas id="cLearn"></canvas></div></div></div>
+    <div class="panel"><div class="panel-h"><div><h2>Learning-rate sweep</h2><p>SGD, eta0 on a log scale</p></div></div><div class="panel-b"><div class="chart"><canvas id="cLr"></canvas></div></div></div>
+    <div class="panel"><div class="panel-h"><div><h2>Training per epoch</h2><p>Validation macro-F1 at three learning rates</p></div></div><div class="panel-b"><div class="chart"><canvas id="cEpoch"></canvas></div></div></div>
+    <div class="panel"><div class="panel-h"><div><h2>Regularisation</h2><p>Logistic regression C: under- vs over-fitting</p></div></div><div class="panel-b"><div class="chart"><canvas id="cReg"></canvas></div></div></div>
+  </div>
+  <div class="panel" style="margin-top:18px"><div class="panel-h"><div><h2>Unseen challenge set</h2><p>30 new lines, never used for training or for writing the rules</p></div></div><div class="panel-b" id="challenge"></div></div>
+  <div class="panel"><div class="panel-h"><div><h2>Mistakes under cross-validation</h2><p>Explained in the model report</p></div></div><div class="panel-b" id="mistakes"></div></div>
+  <div class="panel"><div class="panel-h"><div><h2>All figures</h2><p>From reports/figures</p></div></div><div class="panel-b"><div class="figs" id="figures"></div></div></div>
 </section>
 
 <section id="quality">
-  <h2>Testing &amp; quality</h2>
-  <p class="sub">Results of <span class="mono">python scripts/quality.py</span>; the same gates run in GitHub Actions on every push.</p>
-  <div class="grid g4" id="qgates"></div>
-  <div class="grid g2" style="margin-top:12px">
-    <div class="card"><h3 style="margin-top:0">Tests</h3><div id="tests"></div></div>
-    <div class="card"><h3 style="margin-top:0">Coverage by file</h3><div id="coverage"></div></div>
+  <div class="page-head">
+    <span class="eyebrow">Testing &amp; quality</span>
+    <h1>Every gate, every push</h1>
+    <p class="lead">Unit, property-based, contract, API and security tests, plus lint, strict types, security and dependency scans.</p>
   </div>
-  <div class="grid g2" style="margin-top:12px">
-    <div class="card"><h3 style="margin-top:0">Static analysis: ruff (lint) · mypy --strict (types)</h3><div id="lint"></div></div>
-    <div class="card"><h3 style="margin-top:0">Security: bandit (SAST) · pip-audit (dependency CVEs)</h3><div id="security"></div></div>
+  <div class="gates" id="qgates" style="margin-bottom:22px"></div>
+  <div class="cols">
+    <div class="panel"><div class="panel-h"><h2>Tests</h2></div><div class="panel-b" id="tests"></div></div>
+    <div class="panel"><div class="panel-h"><h2>Coverage by file</h2></div><div class="panel-b" id="coverage"></div></div>
   </div>
-  <div class="card" style="margin-top:12px"><h3 style="margin-top:0">Complexity (radon): cyclomatic complexity per function, maintainability per file</h3><div id="complexity"></div></div>
+  <div class="cols" style="margin-top:18px">
+    <div class="panel"><div class="panel-h"><div><h2>Static analysis</h2><p>ruff (lint) · mypy --strict (types)</p></div></div><div class="panel-b" id="lint"></div></div>
+    <div class="panel"><div class="panel-h"><div><h2>Security</h2><p>bandit (code) · pip-audit (dependency CVEs)</p></div></div><div class="panel-b" id="security"></div></div>
+  </div>
+  <div class="panel" style="margin-top:18px"><div class="panel-h"><div><h2>Complexity</h2><p>radon: cyclomatic complexity per function, maintainability per file</p></div></div><div class="panel-b" id="complexity"></div></div>
 </section>
 
 <section id="docs">
-  <h2>Docs &amp; findings</h2>
-  <p class="sub">The repo's documentation, including the findings log written during the build.</p>
-  <div class="row" id="docTabs" style="margin-bottom:12px"></div>
-  <div class="card md" id="docBody"></div>
+  <div class="page-head">
+    <span class="eyebrow">Docs &amp; findings</span>
+    <h1>How it was built, and what went wrong</h1>
+    <p class="lead">The findings log records every problem caught during the build and the decision taken.</p>
+  </div>
+  <div class="doc-tabs" id="docTabs"></div>
+  <div class="panel"><div class="panel-b md" id="docBody"></div></div>
 </section>
 
 <section id="code">
-  <h2>Code</h2>
-  <p class="sub">Read-only browser over the repo (whitelisted folders only).</p>
+  <div class="page-head">
+    <span class="eyebrow">Code</span>
+    <h1>Read the source</h1>
+    <p class="lead">A read-only view of the repository.</p>
+  </div>
   <div class="codegrid">
-    <div class="card files" id="fileList"></div>
-    <div class="card"><div class="mono muted" id="filePath" style="margin-bottom:8px"></div><pre><code id="fileBody"></code></pre></div>
+    <div class="panel"><div class="panel-b files" id="fileList"></div></div>
+    <div class="panel"><div class="panel-h"><span class="mono muted" id="filePath"></span></div><div class="panel-b"><pre><code id="fileBody"></code></pre></div></div>
   </div>
 </section>
+
+<p class="foot">Mohammed Sohail · <a href="https://github.com/mohammedsohail-virufy/jubii7-invoice-reader">Source on GitHub</a> · sample document: all names, numbers and companies are fictitious</p>
 </main>
 
 <script>
@@ -285,40 +398,38 @@ let D = {};
 async function boot() {
   if (STATIC) {
     $("#pyStatus").style.display = "inline-block"; setPyStatus("static site", "INFO");
-    document.querySelectorAll(".sub .live-note").forEach(n => n.remove());
-    $("#overview .sub").insertAdjacentHTML("beforeend", ` <b>On this site the checker and classifier run as the package's own Python code inside your browser (Pyodide, WebAssembly): no server.</b> <a href="https://github.com/mohammedsohail-virufy/jubii7-invoice-reader">Source on GitHub</a>.`);
+    $("#overviewLead").insertAdjacentHTML("beforeend", ` Here the checks run as the project's own Python code inside your browser, with no server.`);
   }
   D = await api("/api/dashboard");
   renderOverview(); renderModel(); renderQuality();
   await loadInvoice("original"); runCheck();
   loadFiles(); loadDocs();
-  if (new URLSearchParams(location.search).has("demo") && location.hash === "#scan") ocr("sample-scan.png");  // shareable demo link
+  if (new URLSearchParams(location.search).has("demo") && location.hash === "#scan") ocr("sample-scan.jpg");  // shareable demo link
 }
 
 // ---------- overview ----------
-function kpi(label, value, note) { return `<div class="card kpi"><div class="l">${esc(label)}</div><div class="v">${value}</div><div class="n">${esc(note || "")}</div></div>`; }
+function stat(value, label, note, accent) { return `<div class="stat"><div class="v${accent ? " accent" : ""}">${value}</div><div class="l">${esc(label)}</div><div class="n">${esc(note || "")}</div></div>`; }
 function renderOverview() {
   const card = D.model_card || {}, ch = card.challenge_set || {}, q = D.quality || {};
   const tests = q.tests || [], passed = tests.filter(t => t.status === "passed").length;
-  const best = card.runs?.[card.model] || {};
   $("#kpis").innerHTML = [
-    kpi("Invoice: correct total", "AED 23,504.04", "printed 23,606.30 → overcharged AED 102.26"),
-    kpi("Issues found", "10 errors", "3 warnings, 1 info"),
-    kpi("Model CV macro-F1", f3(best.cv_f1_macro_mean), `± ${f3(best.cv_f1_macro_std)} over 25 folds (${card.model || "–"})`),
-    kpi("Unseen set: rules → model", f3(ch.cascade_f1), `model alone ${f3(ch.model_f1)}`),
-    kpi("Lines auto-decided (unseen)", pct(ch.cascade_automation), `model alone ${pct(ch.model_automation)}`),
-    kpi("Accuracy when automatic", pct(ch.cascade_automated_accuracy), "the rest go to a person"),
-    kpi("Tests passing", tests.length ? `${passed}/${tests.length}` : "–", "unit, property-based, contract, API"),
-    kpi("Coverage", q.coverage ? q.coverage.total + "%" : "–", "line coverage of src/jubii7"),
+    stat("AED 102.26", "overcharge found", "correct total 23,504.04, printed 23,606.30", true),
+    stat("10", "errors caught", "plus 3 warnings, 1 note"),
+    stat(pct(ch.cascade_automation), "lines decided automatically", `on unseen lines, ${pct(ch.cascade_automated_accuracy)} correct`),
+    stat(tests.length ? `${passed}/${tests.length}` : "–", "tests passing", q.coverage ? `${q.coverage.total}% coverage` : ""),
   ].join("");
-  $("#gates").innerHTML = gateCards();
+  $("#gates").innerHTML = gatePills();
 }
-function gateCards() {
+function gatePills() {
   const s = D.quality?.summary;
-  if (!s) return `<div class="card muted">Run <span class="mono">python scripts/quality.py</span> to populate.</div>`;
-  const label = {tests: "pytest + coverage", lint: "ruff lint", format: "ruff format", types: "mypy --strict", security: "bandit (SAST)", deps: "pip-audit (CVEs)", complexity: "radon CC", maintainability: "radon MI"};
-  return Object.entries(s).map(([k, v]) => `<div class="card kpi"><div class="l">${esc(label[k] || k)}</div><div class="v">${badge(v.passed ? "PASS" : "FAIL")}</div><div class="n">${v.seconds}s</div></div>`).join("");
+  if (!s) return `<span class="muted">Run <span class="mono">python scripts/quality.py</span> to populate.</span>`;
+  const label = {tests: "Tests", lint: "Lint", format: "Format", types: "Types (strict)", security: "Security scan", deps: "Dependency CVEs", complexity: "Complexity", maintainability: "Maintainability"};
+  return Object.entries(s).map(([k, v]) => `<span class="gate${v.passed ? "" : " fail"}"><i></i>${esc(label[k] || k)} <span>${v.passed ? "pass" : "fail"}</span></span>`).join("");
 }
+document.querySelectorAll("[data-go]").forEach(b => {
+  b.onclick = () => { document.querySelector(`#nav [data-t="${b.dataset.go}"]`).click(); window.scrollTo({top: 0}); };
+  b.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); b.click(); } };
+});
 
 // ---------- scan document ----------
 const loadScript = src => new Promise((ok, fail) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => fail(new Error("could not load " + src)); document.head.appendChild(s); });
@@ -337,7 +448,7 @@ async function drawToCanvas(source) {
     await pg.render({canvasContext: ctx, viewport: vp}).promise;
   } else {
     const img = new Image(); img.src = typeof source === "string" ? source : URL.createObjectURL(source); await img.decode();
-    const scale = Math.min(1, 2200 / Math.max(img.width, img.height));
+    const scale = Math.min(2.2, 2600 / Math.max(img.width, img.height));  // upscale small phone photos: OCR reads 42% -> 55% on the challenge photo
     canvas.width = img.width * scale; canvas.height = img.height * scale;
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   }
@@ -357,15 +468,17 @@ async function ocr(source) {
     ocrWorker ||= await Tesseract.createWorker(["eng", "ara"], 1, {logger: m => progress(m.status, m.progress)});
     progress("Recognising text…", 0);
     const {data} = await ocrWorker.recognize(canvas);
-    $("#ocrText").value = data.text;
+    $("#ocrText").value = data.text; syncAnalyse();
     progress(`Done · OCR confidence ${Math.round(data.confidence)}%`, 1);
     analyseScan();
   } catch (e) { $("#ocrProgress").innerHTML = `<span class="err">${esc(e.message || e)}</span>`; }
 }
 $("#scanCamera").onchange = e => e.target.files[0] && ocr(e.target.files[0]);
 $("#scanUpload").onchange = e => e.target.files[0] && ocr(e.target.files[0]);
-$("#scanSample").onclick = () => ocr("sample-scan.png");
+$("#scanSample").onclick = () => ocr("sample-scan.jpg");
 $("#scanAnalyse").onclick = analyseScan;
+const syncAnalyse = () => { $("#scanAnalyse").disabled = !$("#ocrText").value.trim(); };
+$("#ocrText").addEventListener("input", syncAnalyse); syncAnalyse();
 async function analyseScan() {
   const text = $("#ocrText").value.trim(); if (!text) return;
   $("#scanResult").innerHTML = `<span class="muted">Analysing…</span>`;
@@ -379,10 +492,10 @@ async function analyseScan() {
          <td>${mathsBadge(l)} <span class="muted">${esc(l.maths_detail)}</span></td><td><b>${esc(l.category || "–")}</b> <span class="muted">${esc(l.source)}</span></td>
          <td>${l.needs_review ? badge("review", "WARN") : badge("auto", "OK")}</td></tr>`).join("")}</table>`
     : `<p class="muted">No line items found (a line item needs a description and at least two numbers).</p>`;
-  $("#scanResult").innerHTML = `<div class="row">${badge(s.line_items + " line items", "INFO")} ${badge(s.maths_checked + " maths checked", "INFO")}
+  $("#scanResult").innerHTML = `<div class="row" style="margin-bottom:6px">${badge(s.line_items + " line items", "INFO")} ${badge(s.maths_checked + " maths checked", "INFO")}
       ${badge(s.errors + " errors", s.errors ? "ERROR" : "OK")} ${badge(s.needs_review + " lines for review", s.needs_review ? "WARN" : "OK")}</div>
     <h3>Line items</h3>${lines}
-    <div class="grid g2"><div><h3>Dates</h3>${r.dates.map(d => `${badge(d.valid ? "valid" : "invalid", d.valid ? "OK" : "ERROR")} <span class="mono">${esc(d.date)}</span>`).join("<br>") || "<span class='muted'>none found</span>"}</div>
+    <div class="cols"><div><h3>Dates</h3>${r.dates.map(d => `${badge(d.valid ? "valid" : "invalid", d.valid ? "OK" : "ERROR")} <span class="mono">${esc(d.date)}</span>`).join("<br>") || "<span class='muted'>none found</span>"}</div>
     <div><h3>TRNs (15 digits)</h3>${r.trns.map(x => `<span class="mono">${esc(x)}</span>`).join("<br>") || "<span class='muted'>none found</span>"}</div></div>
     <h3>Issues</h3>${r.issues.length ? `<table>${r.issues.map(i => `<tr><td>${badge(i.severity)}</td><td dir="auto">${esc(i.issue)}</td><td class="mono muted">${esc(i.check)}</td></tr>`).join("")}</table>` : "<span class='ok'>No issues found in the text.</span>"}`;
 }
@@ -399,7 +512,7 @@ async function runCheck() {
   try { body = JSON.parse($("#invoiceJson").value); } catch (e) { $("#checkSummary").innerHTML = `<span class="err">Invalid JSON: ${esc(e.message)}</span>`; return; }
   let r;
   try { r = await post("/invoice/check", body); } catch (e) { $("#checkSummary").innerHTML = `<span class="err">${esc(e.message)}</span>`; return; }
-  $("#checkSummary").innerHTML = `<div class="row"><b style="font-size:18px">${esc(r.invoice_no)}</b>${badge(r.status.startsWith("OK") ? "OK" : "REJECT", r.status.startsWith("OK") ? "OK" : "ERROR")}</div>
+  $("#checkSummary").innerHTML = `<div class="row"><span class="big">${esc(r.invoice_no)}</span>${badge(r.status.startsWith("OK") ? "OK" : "REJECT", r.status.startsWith("OK") ? "OK" : "ERROR")}</div>
     <div class="row" style="margin-top:8px">${badge(r.summary.ERROR + " errors", "ERROR")} ${badge(r.summary.WARN + " warnings", "WARN")} ${badge(r.summary.INFO + " info", "INFO")}</div>
     <p class="muted" style="margin:8px 0 0">${esc(r.status)}</p>`;
   $("#issues").innerHTML = r.issues.length ? `<table><tr><th>Severity</th><th>Field</th><th>Problem</th><th>Rule</th></tr>${r.issues.map(i =>
@@ -411,7 +524,7 @@ async function runCheck() {
     const pv = String(p).includes("(") ? -num(p) : num(p), d = pv - k, bad = Math.abs(d) > 0.01;
     return `<tr><td>${n}</td><td class="num">${esc(p)}</td><td class="num">${money(k)}</td><td class="num ${bad ? "err" : "ok"}">${bad ? money(d) : "✓"}</td></tr>`; }).join("")}</table>`;
   const p = r.profile;
-  $("#profile").innerHTML = `<div class="grid g2"><div><b>Fields with Arabic digits</b><ul class="mono">${p.fields_with_arabic_digits.map(x => `<li dir="auto">${esc(x)}</li>`).join("") || "<li>none</li>"}</ul></div>
+  $("#profile").innerHTML = `<div class="cols"><div><b>Fields with Arabic digits</b><ul class="mono">${p.fields_with_arabic_digits.map(x => `<li dir="auto">${esc(x)}</li>`).join("") || "<li>none</li>"}</ul></div>
     <div><b>Missing values</b><ul class="mono">${p.missing_values.map(x => `<li>${esc(x)}</li>`).join("") || "<li>none</li>"}</ul><b>Flagged to verify on the scan</b><ul class="mono">${p.flagged_for_verification.map(x => `<li>${esc(x)}</li>`).join("") || "<li>none</li>"}</ul></div></div>`;
 }
 
@@ -428,7 +541,7 @@ async function classify() {
       <span class="node ${byRule ? "hit" : ""}">Rules ${byRule ? "✓ " + esc(r.reason) : "· no confident match"}</span><span class="muted">→</span>
       <span class="node ${byRule ? "skip" : "hit"}">ML model ${byRule ? "(skipped)" : "· confidence " + f3(r.confidence)}</span><span class="muted">→</span>
       <span class="node ${r.needs_review ? "hit" : "skip"}">Human review ${r.needs_review ? "· needed" : "(not needed)"}</span></div>
-    <div class="row"><b style="font-size:18px">${esc(r.category)}</b>${r.needs_review ? badge("needs review", "WARN") : badge("auto", "OK")}<span class="muted mono" dir="auto">normalised: ${esc(r.normalised)}</span></div>
+    <div class="row"><span class="big">${esc(r.category)}</span>${r.needs_review ? badge("needs review", "WARN") : badge("auto", "OK")}<span class="muted mono" dir="auto">normalised: ${esc(r.normalised)}</span></div>
     ${r.top3.length ? `<table style="margin-top:8px">${r.top3.map(t => `<tr><td style="width:110px">${esc(t.category)}</td><td><div class="barwrap"><div class="barfill" style="width:${t.p * 100}%"></div></div></td><td class="num" style="width:60px">${f3(t.p)}</td></tr>`).join("")}</table>` : ""}`;
 }
 $("#runBatch").onclick = async () => {
@@ -449,13 +562,15 @@ function line(id, labels, sets, logX, yTitle) {
 const pts = (xs, ys) => xs.map((x, i) => ({x, y: ys[i]}));
 function renderModel() {
   const card = D.model_card, ev = D.evaluation;
-  if (!card || !ev) { $("#modelKpis").innerHTML = `<div class="card muted">Run <span class="mono">jubii7 train</span> first.</div>`; return; }
+  if (!card || !ev) { $("#modelKpis").innerHTML = `<div class="stat muted">Run <span class="mono">jubii7 train</span> first.</div>`; return; }
   const best = card.runs[card.model], ch = card.challenge_set || {};
-  $("#modelKpis").innerHTML = [kpi("Chosen model", esc(card.model), card.selection), kpi("CV macro-F1", f3(best.cv_f1_macro_mean), "± " + f3(best.cv_f1_macro_std)),
-    kpi("Hold-out macro-F1", f3(card.holdout.f1_macro), "18 rows: indicative only"), kpi("Unseen set macro-F1", f3(ch.model_f1), `rules → model: ${f3(ch.cascade_f1)}`)].join("");
+  $("#modelKpis").innerHTML = [stat(f3(best.cv_f1_macro_mean), "cross-validated macro-F1", `± ${f3(best.cv_f1_macro_std)} over 25 folds`, true),
+    stat(f3(card.holdout.f1_macro), "hold-out macro-F1", "18 rows, indicative only"),
+    stat(f3(ch.cascade_f1), "unseen lines, rules → model", `model alone ${f3(ch.model_f1)}`),
+    stat(pct(ch.cascade_automation), "decided automatically", `model alone ${pct(ch.model_automation)}`)].join("");
   $("#runs").innerHTML = `<table><tr><th>Run</th><th class="num">CV macro-F1</th><th class="num">± std</th><th class="num">CV accuracy</th><th class="num">Hold-out F1</th><th class="num">Hold-out log loss</th><th>MLflow run</th></tr>${Object.entries(card.runs).map(([n, r]) =>
     `<tr><td>${n === card.model ? "<b>" + esc(n) + "</b> ✓" : esc(n)}</td><td class="num">${f3(r.cv_f1_macro_mean)}</td><td class="num">${f3(r.cv_f1_macro_std)}</td><td class="num">${f3(r.cv_accuracy_mean)}</td><td class="num">${f3(r.test_f1_macro)}</td><td class="num">${f3(r.test_log_loss)}</td><td class="mono muted">${esc(String(r.run_id).slice(0, 8))}</td></tr>`).join("")}</table>`;
-  const c = ev.curves || {}, blue = css("--blue") || "#2563eb", orange = css("--accent") || "#ea580c";
+  const c = ev.curves || {}, blue = css("--blue") || "#2563eb", orange = css("--orange") || "#ea580c";
   const tv = (d, key, log) => [{label: "train", data: pts(d[key], d.train_mean), borderColor: blue, backgroundColor: blue}, {label: "validation (CV)", data: pts(d[key], d.valid_mean), borderColor: orange, backgroundColor: orange}];
   if (c.learning_curve) line("#cLearn", null, tv(c.learning_curve, "train_rows"), false, "macro-F1");
   if (c.learning_rate) line("#cLr", null, tv(c.learning_rate, "eta0"), true, "macro-F1");
@@ -470,13 +585,13 @@ function renderModel() {
   const caps = {"01": "Model comparison: mean ± std macro-F1 over 25 CV folds.", "02": "Spread of macro-F1 across folds: small data means wide spread.", "03": "Per-class precision / recall / F1 on the hold-out split.",
     "04": "Confusion matrix on the hold-out split.", "05": "Learning curve: validation still rising → more labels help most.", "06": "Regularisation curve for logistic regression (C).",
     "07": "SGD learning-rate sweep.", "08": "Training loss and validation F1 per epoch at three learning rates.", "09": "Rules → model vs model on the unseen challenge set (honest).", "10": "Same comparison under CV on the training rows (optimistic for the rules)."};
-  $("#figures").innerHTML = (D.figures || []).map(f => `<figure class="card"><img src="figures/${esc(f)}" alt="${esc(f)}" loading="lazy"><figcaption>${esc(caps[f.slice(0, 2)] || f)}</figcaption></figure>`).join("");
+  $("#figures").innerHTML = (D.figures || []).map(f => `<figure><img src="figures/${esc(f)}" alt="${esc(f)}" loading="lazy"><figcaption>${esc(caps[f.slice(0, 2)] || f)}</figcaption></figure>`).join("");
 }
 
 // ---------- quality ----------
 function renderQuality() {
   const q = D.quality || {};
-  $("#qgates").innerHTML = gateCards();
+  $("#qgates").innerHTML = gatePills();
   const tests = q.tests || [], byFile = {};
   tests.forEach(t => (byFile[t.file] ||= []).push(t));
   $("#tests").innerHTML = tests.length ? Object.entries(byFile).map(([f, ts]) => `<details><summary><b class="mono">${esc(f)}</b> · ${ts.filter(t => t.status === "passed").length}/${ts.length} passed</summary>
@@ -494,7 +609,7 @@ function renderQuality() {
   const cc = q.complexity || {}, mi = q.maintainability || {}, fns = [];
   Object.entries(cc).forEach(([f, items]) => Array.isArray(items) && items.forEach(i => fns.push({f, ...i})));
   fns.sort((a, b) => b.complexity - a.complexity);
-  $("#complexity").innerHTML = `<div class="grid g2"><div><b>Most complex functions</b> <span class="muted">(A = 1–5 simple, B = 6–10, C = 11–20)</span><table>${fns.slice(0, 12).map(x => `<tr><td class="mono">${esc(x.f.replace(/\\/g, "/").replace(/^src\/jubii7\//, ""))} · ${esc(x.name)}</td><td>${badge(x.rank, x.rank <= "A" ? "PASS" : x.rank <= "B" ? "INFO" : "WARN")}</td><td class="num">${x.complexity}</td></tr>`).join("")}</table></div>
+  $("#complexity").innerHTML = `<div class="cols"><div><b>Most complex functions</b> <span class="muted">(A = 1–5 simple, B = 6–10, C = 11–20)</span><table>${fns.slice(0, 12).map(x => `<tr><td class="mono">${esc(x.f.replace(/\\/g, "/").replace(/^src\/jubii7\//, ""))} · ${esc(x.name)}</td><td>${badge(x.rank, x.rank <= "A" ? "PASS" : x.rank <= "B" ? "INFO" : "WARN")}</td><td class="num">${x.complexity}</td></tr>`).join("")}</table></div>
     <div><b>Maintainability index</b> <span class="muted">(A ≥ 20 is maintainable)</span><table>${Object.entries(mi).sort((a, b) => a[1].mi - b[1].mi).slice(0, 12).map(([f, v]) => `<tr><td class="mono">${esc(f.replace(/\\/g, "/").replace(/^src\/jubii7\//, ""))}</td><td>${badge(v.rank, v.rank === "A" ? "PASS" : "WARN")}</td><td class="num">${Number(v.mi).toFixed(0)}</td></tr>`).join("")}</table></div></div>`;
 }
 
@@ -516,7 +631,7 @@ async function openFile(el) {
 const DOCS = [["Findings", "docs/FINDINGS.md"], ["README", "README.md"], ["Testing methods", "docs/TESTING.md"], ["Model report", "docs/MODEL_REPORT.md"],
   ["Architecture", "docs/ARCHITECTURE.md"], ["Track C", "docs/TRACK_C.md"], ["AI prompts", "docs/PROMPTS.md"]];
 function loadDocs() {
-  $("#docTabs").innerHTML = DOCS.map(([n, p], i) => `<button class="btn${i ? "" : " on"}" data-doc="${p}">${n}</button>`).join("");
+  $("#docTabs").innerHTML = DOCS.map(([n, p], i) => `<button class="btn small${i ? "" : " on"}" data-doc="${p}">${n}</button>`).join("");
   document.querySelectorAll("[data-doc]").forEach(b => b.onclick = () => { document.querySelectorAll("[data-doc]").forEach(x => x.classList.remove("on")); b.classList.add("on"); showDoc(b.dataset.doc); });
   showDoc(DOCS[0][1]);
 }
@@ -525,7 +640,7 @@ async function showDoc(path) {
   $("#docBody").innerHTML = window.marked ? marked.parse(r.content) : `<pre>${esc(r.content)}</pre>`;
 }
 
-boot().catch(e => document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="card err">Could not load the dashboard: ${esc(e.message)}</div>`));
+boot().catch(e => document.querySelector("main").insertAdjacentHTML("afterbegin", `<div class="panel panel-b err">Could not load the dashboard: ${esc(e.message)}</div>`));
 </script>
 </body>
 </html>

@@ -167,9 +167,9 @@ def mount_dashboard(app: FastAPI, root: Path) -> None:
         "/figures", StaticFiles(directory=root / "reports" / "figures", check_dir=False), name="figures"
     )
 
-    @app.get("/sample-scan.png", include_in_schema=False)
+    @app.get("/sample-scan.jpg", include_in_schema=False)
     def sample_scan() -> FileResponse:
-        return FileResponse(root / "data" / "sample_scan.png")
+        return FileResponse(root / "data" / "original_invoice_photo.jpg")  # the original challenge photo
 
     @app.get("/", include_in_schema=False)
     def index() -> FileResponse:

@@ -50,8 +50,12 @@ def main() -> None:
     if not portable.exists():
         raise SystemExit("models/model_portable.json missing: run `jubii7 train` first")
 
-    shutil.rmtree(SITE, ignore_errors=True)
-    SITE.mkdir()
+    SITE.mkdir(exist_ok=True)
+    for child in SITE.iterdir():  # empty it in place: the folder may be open in a local preview server
+        if child.is_dir():
+            shutil.rmtree(child)
+        else:
+            child.unlink()
     (SITE / ".nojekyll").touch()  # serve files as-is
 
     html = (PACKAGE / "web" / "static" / "index.html").read_text(encoding="utf-8")
@@ -61,7 +65,7 @@ def main() -> None:
     (SITE / "index.html").write_text(html, encoding="utf-8")
 
     shutil.copytree(ROOT / "reports" / "figures", SITE / "figures")
-    shutil.copy(ROOT / "data" / "sample_scan.png", SITE / "sample-scan.png")
+    shutil.copy(ROOT / "data" / "original_invoice_photo.jpg", SITE / "sample-scan.jpg")
     write_json(SITE / "data" / "dashboard.json", ReportReader(ROOT).payload())
     write_json(
         SITE / "data" / "invoice_original.json",

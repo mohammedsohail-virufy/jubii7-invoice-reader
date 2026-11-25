@@ -1,6 +1,6 @@
 # jubii.7 Live Challenge · Track A: Read the messy invoice
 
-**Live demo: [https://mohammedsohail-virufy.github.io/jubii7-invoice-reader/](https://mohammedsohail-virufy.github.io/jubii7-invoice-reader/)** (works on mobile). Scan or upload an invoice, check it, classify lines, and review the tests, scans and model curves. Try the sample scan: [https://mohammedsohail-virufy.github.io/jubii7-invoice-reader/?demo#scan](https://mohammedsohail-virufy.github.io/jubii7-invoice-reader/?demo#scan)
+**Live demo: [https://mohammedsohail-virufy.github.io/jubii7-invoice-reader/](https://mohammedsohail-virufy.github.io/jubii7-invoice-reader/)** (works on mobile). Scan or upload an invoice, check it, classify lines, and review the tests, scans and model curves. Try the original challenge photo: [https://mohammedsohail-virufy.github.io/jubii7-invoice-reader/?demo#scan](https://mohammedsohail-virufy.github.io/jubii7-invoice-reader/?demo#scan)
 
 Validation and classification core for a document-scanning pipeline. It takes a bilingual
 (Arabic/English) building-materials tax invoice, already extracted to JSON, and:
